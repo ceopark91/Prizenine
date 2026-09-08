@@ -1,4 +1,4 @@
-const PRODUCT_SHEET_CSV_URL = '';
+const PRODUCT_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1b_dNkuhjl2XQbc3JG4dTrjbIyszzkjLs6cP35xaHQFY/export?format=csv&gid=0';
 const fallbackProducts = [
   { number: '01', category: '생활', title: '아침을 바꾸는 작은 조명', product: '무드등 · 오늘의집', image: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=360&q=85', link: 'https://www.coupang.com/' },
   { number: '02', category: '테크', title: '책상 위, 가장 예쁜 소리', product: '블루투스 스피커 · JBL', image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=360&q=85', link: 'https://www.coupang.com/' },
@@ -38,12 +38,12 @@ function parseCsv(csv) {
   return rows.map((values) => {
     const record = Object.fromEntries(headers.map((header, index) => [header, values[index] || '']));
     return {
-      number: record['번호'] || record.number,
+      number: record['제품번호'] || record['번호'] || record.number,
       category: record['카테고리'] || record.category || '기타',
       title: record['상품명'] || record.title,
-      product: record['제품 설명'] || record['설명'] || record.product,
-      image: record['이미지 url'] || record['이미지'] || record.image,
-      link: record['구매 링크'] || record['쿠팡 링크'] || record.link
+      product: record['브랜드/제품설명'] || record['제품 설명'] || record['설명'] || record.product,
+      image: record['상품이미지'] || record['이미지 url'] || record['이미지'] || record.image,
+      link: record['쿠팡 구매링크'] || record['구매 링크'] || record['쿠팡 링크'] || record.link
     };
   }).filter((item) => item.number && item.title && item.link);
 }

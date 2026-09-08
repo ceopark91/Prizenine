@@ -12,11 +12,11 @@ npx serve .
 
 Vercel에서 이 저장소를 Import하면 됩니다. Framework Preset은 `Other`, Build Command는 비워두고 Output Directory는 `.`으로 설정하세요.
 
-방문자 페이지는 [app.js](app.js)의 `PRODUCT_SHEET_CSV_URL`에 입력한 공개 구글시트 CSV를 자동으로 읽습니다. 시트 첫 행은 아래 컬럼명을 사용하세요.
+방문자 페이지는 [app.js](app.js)의 `PRODUCT_SHEET_CSV_URL`에 연결된 구글시트 CSV를 자동으로 읽습니다. 현재 연결된 시트는 `1b_dNkuhjl2XQbc3JG4dTrjbIyszzkjLs6cP35xaHQFY`의 `gid=0` 탭이며, 첫 행은 아래 컬럼명을 사용합니다.
 
 ```text
-번호,카테고리,상품명,제품 설명,이미지 URL,구매 링크
-01,생활,상품명,브랜드 · 제품 설명,https://이미지주소,https://쿠팡상품주소
+제품번호,카테고리,상품명,브랜드/제품설명,쿠팡 구매링크,상품이미지
+01,생활,상품명,브랜드 · 제품 설명,https://쿠팡상품주소,https://이미지주소
 ```
 
 구글시트에서 `파일 > 공유 > 웹에 게시`를 선택하고, 전체 문서를 CSV 형식으로 게시한 URL을 `PRODUCT_SHEET_CSV_URL`에 넣으면 됩니다. URL을 넣지 않으면 샘플 상품이 표시됩니다.

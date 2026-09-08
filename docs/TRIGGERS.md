@@ -19,3 +19,5 @@ curl -X POST https://prizenine.vercel.app/api/trigger \
 ```
 
 텔레그램 BotFather에서 webhook을 연결할 때는 중계 서버에서 받은 메시지 텍스트를 `text` 필드로 전달하고 `X-Trigger-Secret`을 붙입니다. 이메일은 Resend/Postmark 등 inbound webhook에서 본문을 `body` 또는 `text`로 전달하면 됩니다. 모든 입력은 URL 하나를 추출하고, 비공개 페이지 로그인 우회나 무단 크롤링은 하지 않습니다.
+
+n8n 사용자는 `automation/n8n-prizenine-trigger.json`을 Import한 뒤 `PRIZENINE_TRIGGER_SECRET` 환경변수를 설정하고, 이메일/텔레그램 노드를 Webhook 노드 앞에 연결하면 됩니다. n8n은 여러 컴퓨터에서 같은 JSON을 재사용할 수 있습니다.

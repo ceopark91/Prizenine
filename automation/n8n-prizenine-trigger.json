@@ -1,0 +1,11 @@
+{
+  "name": "PrizeNine product link trigger",
+  "nodes": [
+    {"parameters":{"httpMethod":"POST","path":"prizenine-product-link","responseMode":"onReceived"},"id":"webhook","name":"Email or Telegram Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0]},
+    {"parameters":{"method":"POST","url":"https://prizenine.vercel.app/api/trigger","sendHeaders":true,"headerParameters":{"parameters":[{"name":"Authorization","value":"Bearer {{$env.PRIZENINE_TRIGGER_SECRET}}"},{"name":"Content-Type","value":"application/json"}]},"sendBody":true,"specifyBody":"json","jsonBody":"={\"text\": $json.text || $json.body || $json.message?.text || $json.message || \"\", \"source\": $json.source || \"n8n\"}"},"id":"forward","name":"Forward to PrizeNine","type":"n8n-nodes-base.httpRequest","typeVersion":4,"position":[260,0]}
+  ],
+  "connections":{"Email or Telegram Webhook":{"main":[[{"node":"Forward to PrizeNine","type":"main","index":0}]]}},
+  "active":false,
+  "settings":{},
+  "versionId":"prizenine-trigger-v1"
+}

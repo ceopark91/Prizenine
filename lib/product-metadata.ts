@@ -2,6 +2,8 @@ import { marketplaceFromUrl, isMarketplaceUrl, isSafeExternalUrl } from '@/lib/p
 
 export const METADATA_MAX_BYTES = 1_000_000;
 export const METADATA_TIMEOUT_MS = 8_000;
+const MAX_REDIRECTS = 5;
+const redirectStatuses = new Set([301, 302, 303, 307, 308]);
 
 export type ProductMetadata = {
   title?: string;
@@ -73,9 +75,22 @@ export async function fetchProductMetadata(inputUrl: string, fetcher: typeof fet
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), METADATA_TIMEOUT_MS);
   try {
-    const response = await fetcher(inputUrl, { redirect: 'follow', signal: controller.signal, headers: { accept: 'text/html,application/xhtml+xml' } });
-    const finalUrl = response.url || inputUrl;
-    if (!isMarketplaceUrl(finalUrl, marketplace)) throw new ProductMetadataError('blocked_url', '리다이렉트된 최종 URL이 허용된 마켓 도메인이 아닙니다.');
+    let currentUrl = inputUrl;
+    let response: Response | undefined;
+    for (let hop = 0; hop <= MAX_REDIRECTS; hop += 1) {
+      response = await fetcher(currentUrl, { redirect: 'manual', signal: controller.signal, headers: { accept: 'text/html,application/xhtml+xml' } });
+      if (!redirectStatuses.has(response.status)) break;
+      const location = response.headers.get('location');
+      if (!location) throw new ProductMetadataError('blocked_url', '리다이렉트 응답에 Location이 없습니다.');
+      if (hop === MAX_REDIRECTS) throw new ProductMetadataError('blocked_url', '리다이렉트 횟수가 너무 많습니다.');
+      let nextUrl: string;
+      try { nextUrl = new URL(location, currentUrl).toString(); } catch { throw new ProductMetadataError('blocked_url', '잘못된 리다이렉트 주소입니다.'); }
+      if (!isMarketplaceUrl(nextUrl, marketplace)) throw new ProductMetadataError('blocked_url', '리다이렉트 대상이 허용된 마켓 도메인이 아닙니다.');
+      currentUrl = nextUrl;
+    }
+    if (!response) throw new ProductMetadataError('fetch_failed', '상품 페이지를 불러오지 못했습니다.');
+    const finalUrl = response.url || currentUrl;
+    if (!isMarketplaceUrl(finalUrl, marketplace)) throw new ProductMetadataError('blocked_url', '최종 URL이 허용된 마켓 도메인이 아닙니다.');
     if (!response.ok) throw new ProductMetadataError('fetch_failed', `상품 페이지를 불러오지 못했습니다. (${response.status})`);
     const html = await readLimited(response, METADATA_MAX_BYTES);
     const parsed = parseProductMetadataHtml(html, finalUrl);

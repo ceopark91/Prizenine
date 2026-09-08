@@ -20,8 +20,9 @@ test('fetches only an allowed final marketplace URL', async () => {
   assert.equal(metadata.affiliateLikeSource, false);
 });
 
-test('rejects a redirect outside the marketplace', async () => {
-  const response = new Response('<title>bad</title>', { status: 200 });
-  Object.defineProperty(response, 'url', { value: 'https://example.com/redirected' });
-  await assert.rejects(() => fetchProductMetadata('https://www.coupang.com/vp/products/1', async () => response), (error: ProductMetadataError) => error.code === 'blocked_url');
+test('blocks an external redirect before a second fetch', async () => {
+  let calls = 0;
+  const redirect = new Response(null, { status: 302, headers: { location: 'https://example.com/redirected' } });
+  await assert.rejects(() => fetchProductMetadata('https://www.coupang.com/vp/products/1', async () => { calls += 1; return redirect; }), (error: ProductMetadataError) => error.code === 'blocked_url');
+  assert.equal(calls, 1);
 });

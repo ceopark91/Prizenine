@@ -35,16 +35,23 @@ function parseCsv(csv) {
     } else cell += character;
   }
   if (cell || row.length) { row.push(cell.trim()); rows.push(row); }
-  const headers = rows.shift()?.map((header) => header.toLowerCase()) || [];
+  const normalizeHeader = (header) => header.toLowerCase().replace(/[\s.()\-/]/g, '');
+  const headers = rows.shift()?.map(normalizeHeader) || [];
+  const numberHeader = headers.find((header) => header.includes('제품번호') || header === '번호') || headers[0];
+  const categoryHeader = headers.find((header) => header.includes('카테고리'));
+  const titleHeader = headers.find((header) => header.includes('상품명'));
+  const productHeader = headers.find((header) => header.includes('브랜드') || header.includes('제품설명'));
+  const linkHeader = headers.find((header) => header.includes('구매링크') || header.includes('쿠팡링크'));
+  const imageHeader = headers.find((header) => header.includes('상품이미지') || header.includes('이미지'));
   return rows.map((values) => {
     const record = Object.fromEntries(headers.map((header, index) => [header, values[index] || '']));
     return {
-      number: record['제품번호'] || record['번호'] || record.number,
-      category: record['카테고리'] || record.category || '기타',
-      title: record['상품명'] || record.title,
-      product: record['브랜드/제품설명'] || record['제품 설명'] || record['설명'] || record.product,
-      image: record['상품이미지'] || record['이미지 url'] || record['이미지'] || record.image || DEFAULT_PRODUCT_IMAGE,
-      link: record['쿠팡 구매링크'] || record['구매 링크'] || record['쿠팡 링크'] || record.link
+      number: record[numberHeader] || record.number,
+      category: record[categoryHeader] || record.category || '기타',
+      title: record[titleHeader] || record.title,
+      product: record[productHeader] || record['설명'] || record.product,
+      image: record[imageHeader] || record.image || DEFAULT_PRODUCT_IMAGE,
+      link: record[linkHeader] || record.link
     };
   }).filter((item) => item.number && item.title && item.link);
 }

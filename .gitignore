@@ -9,3 +9,7 @@ dist
 vercel
 *.log
 .DS_Store
+
+.wrangler/
+.next/
+node_modules/

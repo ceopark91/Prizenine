@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f0e8" />
+    <meta name="description" content="짧게 보고, 현명하게 사는 리뷰 영상 허브" />
+    <title>픽로그 | 오늘의 발견</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body>
+    <div class="site-shell">
+      <nav class="nav-bar" aria-label="주 메뉴">
+        <a class="brand" href="#top" aria-label="픽로그 홈">
+          <span class="brand-mark"><i data-lucide="sparkles"></i></span>
+          <span>picklog<span class="brand-dot">.</span></span>
+        </a>
+        <div class="nav-links">
+          <a class="active" href="#videos">최신 영상</a>
+          <a href="#about">픽로그 소개</a>
+        </div>
+        <button class="icon-button" id="search-toggle" type="button" aria-label="검색 열기" title="검색">
+          <i data-lucide="search"></i>
+        </button>
+      </nav>
+
+      <main id="top">
+        <section class="hero-section">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="live-dot"></span> 매일 업데이트되는 쇼핑 노트</p>
+            <h1>보기 좋은 물건은<br /><em>사는 순간</em>도 좋으니까.</h1>
+            <p class="hero-description">광고보다 솔직하게, 스크롤보다 짧게.<br />직접 써보고 고른 제품만 한 곳에 모았어요.</p>
+            <a class="button button-dark" href="#videos">오늘의 영상 보기 <i data-lucide="arrow-down-right"></i></a>
+          </div>
+          <div class="hero-collage" aria-label="추천 상품 이미지">
+            <div class="collage-label">01 / 24</div>
+            <div class="hero-image image-one"></div>
+            <div class="hero-image image-two"></div>
+            <div class="hero-sticker">staff<br />pick <i data-lucide="arrow-up-right"></i></div>
+          </div>
+        </section>
+
+        <section class="ticker" aria-label="사이트 특징">
+          <div class="ticker-track"><span>NO FLUFF, JUST GOOD FINDS</span><b>✳</b><span>짧고 정확한 리뷰</span><b>✳</b><span>NO FLUFF, JUST GOOD FINDS</span><b>✳</b><span>짧고 정확한 리뷰</span></div>
+        </section>
+
+        <section class="video-section" id="videos">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">CURATED VIDEOS</p>
+              <h2>오늘의 발견<span class="accent">.</span></h2>
+            </div>
+            <p class="section-note">매주 월·수·금<br />새로운 리뷰가 올라와요.</p>
+          </div>
+          <div class="toolbar">
+            <div class="filter-tabs" role="tablist" aria-label="카테고리 필터">
+              <button class="filter active" data-filter="전체" type="button">전체 <span>06</span></button>
+              <button class="filter" data-filter="생활" type="button">생활</button>
+              <button class="filter" data-filter="테크" type="button">테크</button>
+              <button class="filter" data-filter="뷰티" type="button">뷰티</button>
+            </div>
+            <div class="search-box" id="search-box">
+              <i data-lucide="search"></i>
+              <input id="search-input" type="search" placeholder="제품명 검색" aria-label="제품명 검색" />
+            </div>
+          </div>
+          <div class="video-grid" id="video-grid"></div>
+          <p class="empty-state" id="empty-state">아직 이 카테고리의 영상이 없어요.</p>
+        </section>
+
+        <section class="about-section" id="about">
+          <div class="about-number">P / L</div>
+          <div>
+            <p class="eyebrow">WHY PICKLOG</p>
+            <h2>넘치는 정보 속,<br /><em>잘 고르는 감각.</em></h2>
+          </div>
+          <p class="about-copy">픽로그는 매일 쏟아지는 상품 중에서 정말 쓸모 있는 것만 골라요. 한 편의 영상으로 충분히 이해하고, 마음에 들면 바로 만날 수 있도록.</p>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <a class="brand" href="#top"><span class="brand-mark"><i data-lucide="sparkles"></i></span><span>picklog<span class="brand-dot">.</span></span></a>
+        <p>© 2026 PICKLOG. GOOD THINGS, WELL PICKED.</p>
+        <a class="footer-link" href="mailto:hello@picklog.kr">제휴 문의 <i data-lucide="arrow-up-right"></i></a>
+      </footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

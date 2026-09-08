@@ -3,6 +3,7 @@ const form = document.querySelector('#product-form');
 const savedList = document.querySelector('#saved-list');
 const emptyState = document.querySelector('#empty-state');
 const savedCount = document.querySelector('#saved-count');
+const formStatus = document.querySelector('#form-status');
 let savedProducts = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
 function renderSavedProducts() {
@@ -16,10 +17,13 @@ function renderSavedProducts() {
 form.addEventListener('submit', (event) => {
   event.preventDefault();
   const data = new FormData(form);
-  savedProducts.unshift(Object.fromEntries(data.entries()));
+  const item = Object.fromEntries(data.entries());
+  item.number = String(savedProducts.reduce((max, product) => Math.max(max, Number(product.number) || 0), 0) + 1).padStart(2, '0');
+  savedProducts.unshift(item);
   localStorage.setItem(storageKey, JSON.stringify(savedProducts));
   form.reset();
   renderSavedProducts();
+  if (formStatus) formStatus.textContent = `제품 ${item.number}번을 접수했습니다. 시트에서는 배열수식 번호를 사용합니다.`;
 });
 
 savedList.addEventListener('click', (event) => {

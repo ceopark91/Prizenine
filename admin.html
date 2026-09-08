@@ -20,15 +20,15 @@
       <section class="admin-intro"><p class="eyebrow">CONTROL ROOM / 2026</p><h1>제품을<br /><em>추가하세요.</em></h1><p>구글시트에 제품 번호, 상품명,<br />구매 링크를 입력하면 방문자 화면에 정리됩니다.</p></section>
       <section class="admin-panel">
         <div class="panel-heading"><div><p class="eyebrow">NEW PRODUCT</p><h2>제품 등록</h2></div><span class="panel-status"><span></span> GOOGLE SHEET</span></div>
-        <p class="sheet-notice">현재 입력 폼은 미리보기용입니다. 실제 방문자 페이지에 반영하려면 아래 안내에 맞춰 구글시트에 행을 추가하세요.</p>
+        <p class="sheet-notice">상품 링크를 입력하면 제품번호는 구글시트 배열수식이 자동으로 부여합니다.</p>
         <form id="product-form">
-          <label>제품 번호<input name="number" required maxlength="3" placeholder="01" /></label>
           <label>상품명<input name="title" required placeholder="예: 책상 위 무드등" /></label>
           <label>카테고리<select name="category"><option>생활</option><option>테크</option><option>뷰티</option></select></label>
           <label>브랜드 / 제품 설명<input name="product" required placeholder="예: 무드등 · 브랜드명" /></label>
-          <label>쿠팡 구매 링크<input name="link" type="url" required placeholder="https://www.coupang.com/..." /></label>
+          <label>파트너스 상품 링크<input name="link" type="url" required placeholder="쿠팡·테무·알리 상품 URL" /></label>
           <label>상품 이미지 URL<input name="image" type="url" placeholder="https://... (선택)" /></label>
           <button class="primary-button" type="submit">제품 목록에 저장 <i data-lucide="arrow-up-right"></i></button>
+          <p id="form-status" class="sheet-notice" role="status" aria-live="polite"></p>
         </form>
       </section>
       <section class="saved-section"><div class="panel-heading"><div><p class="eyebrow">CURRENT INDEX</p><h2>등록된 제품</h2></div><span id="saved-count">0 ITEMS</span></div><div class="saved-list" id="saved-list"></div><p class="empty-state" id="empty-state">아직 추가한 제품이 없습니다.</p></section>

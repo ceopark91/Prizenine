@@ -34,6 +34,15 @@ curl -X POST "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook" \
   -d '{"url":"https://prizenine.vercel.app/api/telegram/webhook","secret_token":"<TELEGRAM_WEBHOOK_SECRET>"}'
 ```
 
+Windows에서는 토큰을 파일에 저장하지 않고 다음 스크립트로 등록할 수도 있습니다.
+
+```powershell
+.\scripts\set-telegram-webhook.ps1 `
+  -BotToken $env:TELEGRAM_BOT_TOKEN `
+  -WebhookUrl "https://prizenine.vercel.app/api/telegram/webhook" `
+  -SecretToken $env:TELEGRAM_WEBHOOK_SECRET
+```
+
 텔레그램 메시지에 상품 URL 하나를 보내면 webhook이 URL을 추출해 등록합니다. URL 추출 실패, 잘못된 secret, 중복 URL은 각각 400/401/중복 응답으로 처리됩니다.
 
 ## 메일 연결

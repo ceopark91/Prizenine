@@ -31,6 +31,7 @@ export function aspectRatioForTaskType(taskType: TopviewGenerationRequest['taskT
 
 const allowedTransitions: Record<TopviewJobStatus, TopviewJobStatus[]> = { queued: ['queued', 'claimed', 'running', 'failed'], claimed: ['claimed', 'running', 'failed'], running: ['running', 'succeeded', 'failed'], succeeded: ['succeeded'], failed: ['failed'] };
 export function isAllowedStatusTransition(from: TopviewJobStatus, to: TopviewJobStatus) { return allowedTransitions[from]?.includes(to) ?? false; }
+export function productStatusForJobStatus(status: TopviewJobStatus) { return { productStatus: status === 'succeeded' ? 'ready' : status === 'failed' ? 'failed' : status === 'queued' ? 'queued' : 'generating', jobStatus: status }; }
 
 export function buildTopviewPrompt(input: Pick<TopviewGenerationRequest, 'productName'> & Pick<TopviewGenerationRequest, 'taskType'>) {
   return `direct_video / ${input.taskType}: ${input.productName}. Korean language, exactly 15 seconds, informative review style, ${input.taskType === 'image_to_video' ? 'use the typed original product image and follow its source aspect ratio; do not send an aspectRatio field' : 'use the product description without inventing unsupported visual claims and use 9:16'}, include a clear CTA. Do not invent price, discount, shipping, or performance claims. Use Canvas mode only when a longer or multi-scene generation is explicitly requested.`;

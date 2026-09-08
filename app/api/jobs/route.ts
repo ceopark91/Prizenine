@@ -1,6 +1,6 @@
 import { getD1 } from '@/db';
 import { isSafeExternalUrl } from '@/lib/products';
-import { aspectRatioForTaskType, buildTopviewPrompt, isAllowedStatusTransition, TOPVIEW_ADAPTER, TOPVIEW_DEFAULTS, type TopviewGenerationResult, type TopviewJobStatus } from '@/lib/topview-adapter';
+import { aspectRatioForTaskType, buildTopviewPrompt, isAllowedStatusTransition, productStatusForJobStatus, TOPVIEW_ADAPTER, TOPVIEW_DEFAULTS, type TopviewGenerationResult, type TopviewJobStatus } from '@/lib/topview-adapter';
 
 const statuses: TopviewJobStatus[] = ['queued', 'claimed', 'running', 'succeeded', 'failed'];
 function validStatus(value: unknown): value is TopviewJobStatus { return typeof value === 'string' && statuses.includes(value as TopviewJobStatus); }
@@ -45,9 +45,9 @@ export async function PATCH(request: Request) {
     if (!isAllowedStatusTransition(current.status as TopviewJobStatus, body.status)) return Response.json({ error: `허용되지 않은 상태 전이입니다: ${current.status} → ${body.status}` }, { status: 409 });
     if ((body.status === 'running' || body.status === 'succeeded') && !(body.taskId || current.task_id)) return Response.json({ error: `${body.status} 상태에는 taskId가 필요합니다.` }, { status: 400 });
     const timestamp = Date.now();
-    const productStatus = body.status === 'succeeded' ? 'ready' : body.status === 'failed' ? 'failed' : body.status === 'queued' ? 'queued' : 'generating';
+    const { productStatus, jobStatus } = productStatusForJobStatus(body.status);
     const jobUpdate = db.prepare('UPDATE generation_jobs SET status = ?1, task_id = COALESCE(?2, task_id), canvas_id = COALESCE(?3, canvas_id), result_url = COALESCE(?4, result_url), error_message = COALESCE(?5, error_message), updated_at = ?6 WHERE id = ?7 AND status = ?8').bind(body.status, body.taskId ?? null, body.canvasId ?? null, body.resultUrl ?? null, body.errorMessage ?? null, timestamp, body.jobId, current.status);
-    const productUpdate = db.prepare('UPDATE products SET status = ?1, video_url = COALESCE(?2, video_url), updated_at = ?3 WHERE id = ?4 AND EXISTS (SELECT 1 FROM generation_jobs WHERE id = ?5 AND status = ?1)').bind(productStatus, body.resultUrl ?? null, timestamp, current.product_id, body.jobId);
+    const productUpdate = db.prepare('UPDATE products SET status = ?1, video_url = COALESCE(?2, video_url), updated_at = ?3 WHERE id = ?4 AND EXISTS (SELECT 1 FROM generation_jobs WHERE id = ?5 AND status = ?6)').bind(productStatus, body.resultUrl ?? null, timestamp, current.product_id, body.jobId, jobStatus);
     const results = await db.batch([jobUpdate, productUpdate]);
     if (!results[0]?.meta?.changes) {
       const afterRace = await db.prepare('SELECT j.status, j.product_id FROM generation_jobs j WHERE j.id = ?1 LIMIT 1').bind(body.jobId).first<any>();

@@ -7,7 +7,9 @@ Vercel 배포 주소의 `POST /api/trigger`로 상품 URL을 보내면 기존 in
 - `TRIGGER_SECRET` (없으면 `INGEST_TOKEN` 사용)
 - `GOOGLE_APPS_SCRIPT_URL` (설정 시 조사된 상품 필드와 URL을 시트 Apps Script로 전달; 예제는 `google-apps-script.gs`)
 
-인증 헤더: `Authorization: Bearer <TRIGGER_SECRET>` 또는 `X-Trigger-Secret`.
+인증 헤더: `Authorization: Bearer <TRIGGER_SECRET>`, `X-Trigger-Secret`, 또는 Telegram webhook의 `X-Telegram-Bot-Api-Secret-Token`.
+
+Telegram 직접 연결 예시: `https://api.telegram.org/bot<BOT_TOKEN>/setWebhook`에 POST하고, JSON에 `url: "https://prizenine.vercel.app/api/trigger"`, `secret_token: "<TRIGGER_SECRET>"`를 지정하세요. 텔레그램 메시지의 `message.text`에서 URL을 자동 추출합니다.
 
 간단한 테스트:
 

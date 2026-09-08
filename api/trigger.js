@@ -8,7 +8,7 @@ function extractUrl(value) {
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const expected = process.env.TRIGGER_SECRET || process.env.INGEST_TOKEN;
-  const supplied = (req.headers.authorization || '').replace(/^Bearer\s+/i, '') || req.headers['x-trigger-secret'] || req.query?.secret;
+  const supplied = (req.headers.authorization || '').replace(/^Bearer\s+/i, '') || req.headers['x-trigger-secret'] || req.headers['x-telegram-bot-api-secret-token'] || req.query?.secret;
   if (!expected || supplied !== expected) return res.status(401).json({ error: 'Unauthorized' });
   const body = typeof req.body === 'string' ? (() => { try { return JSON.parse(req.body); } catch (_) { return { text: req.body }; } })() : (req.body || {});
   const url = extractUrl(body.url || body.text || body.message?.text || body.message || body.content || body.body);

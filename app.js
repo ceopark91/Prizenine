@@ -1,4 +1,5 @@
-const products = [
+const PRODUCT_SHEET_CSV_URL = '';
+const fallbackProducts = [
   { number: '01', category: '생활', title: '아침을 바꾸는 작은 조명', product: '무드등 · 오늘의집', image: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=360&q=85', link: 'https://www.coupang.com/' },
   { number: '02', category: '테크', title: '책상 위, 가장 예쁜 소리', product: '블루투스 스피커 · JBL', image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=360&q=85', link: 'https://www.coupang.com/' },
   { number: '03', category: '뷰티', title: '매일 쓰는 것의 기준', product: '선크림 · Beauty of Joseon', image: 'https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=360&q=85', link: 'https://www.coupang.com/' },
@@ -11,6 +12,56 @@ const emptyState = document.querySelector('#empty-state');
 const searchInput = document.querySelector('#search-input');
 const count = document.querySelector('#product-count');
 let selectedCategory = '전체';
+let products = [];
+
+function parseCsv(csv) {
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let quoted = false;
+  for (let index = 0; index < csv.length; index += 1) {
+    const character = csv[index];
+    const nextCharacter = csv[index + 1];
+    if (character === '"' && quoted && nextCharacter === '"') { cell += '"'; index += 1; }
+    else if (character === '"') quoted = !quoted;
+    else if (character === ',' && !quoted) { row.push(cell.trim()); cell = ''; }
+    else if ((character === '\n' || character === '\r') && !quoted) {
+      if (character === '\r' && nextCharacter === '\n') index += 1;
+      row.push(cell.trim());
+      if (row.some(Boolean)) rows.push(row);
+      row = [];
+      cell = '';
+    } else cell += character;
+  }
+  if (cell || row.length) { row.push(cell.trim()); rows.push(row); }
+  const headers = rows.shift()?.map((header) => header.toLowerCase()) || [];
+  return rows.map((values) => {
+    const record = Object.fromEntries(headers.map((header, index) => [header, values[index] || '']));
+    return {
+      number: record['번호'] || record.number,
+      category: record['카테고리'] || record.category || '기타',
+      title: record['상품명'] || record.title,
+      product: record['제품 설명'] || record['설명'] || record.product,
+      image: record['이미지 url'] || record['이미지'] || record.image,
+      link: record['구매 링크'] || record['쿠팡 링크'] || record.link
+    };
+  }).filter((item) => item.number && item.title && item.link);
+}
+
+async function loadProducts() {
+  products = fallbackProducts;
+  if (!PRODUCT_SHEET_CSV_URL) { renderProducts(); return; }
+  try {
+    const response = await fetch(PRODUCT_SHEET_CSV_URL, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Sheet returned ${response.status}`);
+    const sheetProducts = parseCsv(await response.text());
+    if (sheetProducts.length) products = sheetProducts;
+  } catch (error) {
+    console.warn('Google Sheet could not be loaded. Showing fallback products.', error);
+  }
+  renderProducts();
+}
+
 function renderProducts() {
   const query = searchInput.value.trim().toLowerCase();
   const filtered = products.filter((item) => {
@@ -35,5 +86,5 @@ document.querySelectorAll('.filter').forEach((button) => button.addEventListener
 }));
 searchInput.addEventListener('input', renderProducts);
 document.querySelector('#clear-search').addEventListener('click', () => { searchInput.value = ''; searchInput.focus(); renderProducts(); });
-renderProducts();
+loadProducts();
 if (window.lucide) lucide.createIcons();

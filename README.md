@@ -12,8 +12,15 @@ npx serve .
 
 Vercel에서 이 저장소를 Import하면 됩니다. Framework Preset은 `Other`, Build Command는 비워두고 Output Directory는 `.`으로 설정하세요.
 
-`app.js` 상단의 `products` 배열에 구글 시트 연동 결과를 연결하면 제품 번호, 상품명, 카테고리, 구매 링크를 자동으로 렌더링할 수 있습니다.
+방문자 페이지는 [app.js](app.js)의 `PRODUCT_SHEET_CSV_URL`에 입력한 공개 구글시트 CSV를 자동으로 읽습니다. 시트 첫 행은 아래 컬럼명을 사용하세요.
+
+```text
+번호,카테고리,상품명,제품 설명,이미지 URL,구매 링크
+01,생활,상품명,브랜드 · 제품 설명,https://이미지주소,https://쿠팡상품주소
+```
+
+구글시트에서 `파일 > 공유 > 웹에 게시`를 선택하고, 전체 문서를 CSV 형식으로 게시한 URL을 `PRODUCT_SHEET_CSV_URL`에 넣으면 됩니다. URL을 넣지 않으면 샘플 상품이 표시됩니다.
 
 ## 관리자 화면
 
-관리자 작업 주소는 `/admin.html`입니다. 현재 입력값은 브라우저 `localStorage`에만 저장되는 화면 프로토타입입니다. 여러 기기에서 공유되는 실제 관리자 기능과 비공개 접근 제어를 사용하려면 인증 가능한 백엔드 또는 Vercel Authentication을 추가해야 합니다.
+관리자 작업 주소는 `/admin.html`입니다. 실제 데이터는 구글시트에서 관리하며, 관리자 페이지의 입력 폼은 현재 미리보기용입니다. 여러 기기에서 공유되는 쓰기 기능과 비공개 접근 제어를 사용하려면 Google Apps Script 또는 인증 가능한 백엔드를 추가해야 합니다.

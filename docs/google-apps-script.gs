@@ -2,7 +2,8 @@
 function doPost(e) {
   var data = JSON.parse(e.postData.contents || '{}');
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-  var row = [data.category || '', data.title || data.productName || '', data.brand || '', data.description || '', data.url || '', data.image || ''];
+  // A열은 ARRAYFORMULA 제품번호이므로 비워 두고 B~F만 기록합니다.
+  var row = ['', data.category || '', data.title || data.productName || '', [data.brand, data.description].filter(Boolean).join(' · '), data.url || '', data.image || ''];
   sheet.appendRow(row);
   return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
 }

@@ -12,7 +12,7 @@ npx serve .
 
 Vercel에서 이 저장소를 Import하면 됩니다. Framework Preset은 `Other`, Build Command는 비워두고 Output Directory는 `.`으로 설정하세요.
 
-방문자 페이지는 [app.js](app.js)의 `PRODUCT_SHEET_CSV_URL`에 연결된 구글시트 CSV를 자동으로 읽습니다. 현재 연결된 시트는 `1b_dNkuhjl2XQbc3JG4dTrjbIyszzkjLs6cP35xaHQFY`의 `gid=0` 탭이며, 첫 행은 아래 컬럼명을 사용합니다.
+방문자 페이지는 [app.js](app.js)의 `PRODUCT_SHEET_CSV_URL`에 연결된 구글시트 CSV를 자동으로 읽습니다. 현재 연결된 시트는 `1b_dNkuhjl2XQbc3JG4dTrjbIyszzkjLs6cP35xaHQFY`의 `gid=0` 탭이며, 첫 행은 아래 컬럼명을 사용합니다. 상품 이미지가 비어 있거나 이미지 URL이 깨진 경우 [default-product.svg](default-product.svg)가 자동으로 표시됩니다.
 
 ```text
 제품번호,카테고리,상품명,브랜드/제품설명,쿠팡 구매링크,상품이미지

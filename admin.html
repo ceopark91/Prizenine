@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>픽로그 관리자</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="admin.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body>
+    <main class="admin-shell">
+      <header class="admin-header">
+        <a class="brand" href="/" aria-label="픽로그 홈"><span class="brand-mark"><i data-lucide="sparkles"></i></span><span>picklog<span class="brand-dot">.</span></span></a>
+        <span class="admin-badge"><i data-lucide="shield-check"></i> ADMIN</span>
+      </header>
+      <section class="admin-intro"><p class="eyebrow">CONTROL ROOM / 2026</p><h1>제품을<br /><em>추가하세요.</em></h1><p>영상 업로드 후 제품 번호, 상품명,<br />구매 링크를 입력하면 방문자 화면에 정리됩니다.</p></section>
+      <section class="admin-panel">
+        <div class="panel-heading"><div><p class="eyebrow">NEW PRODUCT</p><h2>제품 등록</h2></div><span class="panel-status"><span></span> LOCAL DRAFT</span></div>
+        <form id="product-form">
+          <label>제품 번호<input name="number" required maxlength="3" placeholder="01" /></label>
+          <label>상품명<input name="title" required placeholder="예: 책상 위 무드등" /></label>
+          <label>카테고리<select name="category"><option>생활</option><option>테크</option><option>뷰티</option></select></label>
+          <label>브랜드 / 제품 설명<input name="product" required placeholder="예: 무드등 · 브랜드명" /></label>
+          <label>쿠팡 구매 링크<input name="link" type="url" required placeholder="https://www.coupang.com/..." /></label>
+          <label>상품 이미지 URL<input name="image" type="url" placeholder="https://... (선택)" /></label>
+          <button class="primary-button" type="submit">제품 목록에 저장 <i data-lucide="arrow-up-right"></i></button>
+        </form>
+      </section>
+      <section class="saved-section"><div class="panel-heading"><div><p class="eyebrow">CURRENT INDEX</p><h2>등록된 제품</h2></div><span id="saved-count">0 ITEMS</span></div><div class="saved-list" id="saved-list"></div><p class="empty-state" id="empty-state">아직 추가한 제품이 없습니다.</p></section>
+      <footer><span>관리자 작업 화면</span><a href="/">방문자 페이지 보기 <i data-lucide="arrow-up-right"></i></a></footer>
+    </main>
+    <script src="admin.js"></script>
+  </body>
+</html>

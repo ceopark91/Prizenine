@@ -1,0 +1,39 @@
+import Link from 'next/link';
+
+export function SiteHeader() {
+  return (
+    <header className="border-b border-[var(--border)] bg-[var(--background)]/90 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
+        <Link href="/" className="display text-lg font-black tracking-tight">
+          <span className="mr-2 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)] text-sm text-white">
+            픽
+          </span>
+          탑뷰 픽
+        </Link>
+        <nav className="flex items-center gap-2 text-sm font-semibold">
+          <Link
+            href="/"
+            className="rounded-full px-3 py-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)]"
+          >
+            상품 찾기
+          </Link>
+          <Link
+            href="/admin"
+            className="rounded-full bg-white px-4 py-2 shadow-sm ring-1 ring-[var(--border)]"
+          >
+            운영자
+          </Link>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+export function Disclosure() {
+  return (
+    <p className="text-xs leading-5 text-[var(--muted-foreground)]">
+      제휴 링크를 통한 구매 시 수수료를 받을 수 있습니다. 가격·재고·배송 정보는
+      판매처에서 확인해 주세요.
+    </p>
+  );
+}

@@ -44,11 +44,12 @@ export default function AdminPage() {
           const productCode = typeof input === 'object' && input !== null && 'productCode' in input ? String((input as { productCode?: unknown }).productCode) : '';
           if (!/^\d{6}$/.test(productCode)) throw new Error('productCode는 6자리 숫자여야 합니다.');
           const response = await fetch('/api/jobs', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code: productCode }), signal: lifecycle.signal });
-          const data = await response.json() as { job?: { status?: string }; error?: string };
+          const data = await response.json() as { job?: { code?: string; status?: string }; deduplicated?: boolean; error?: string };
           if (!response.ok) throw new Error(data.error || '작업을 큐에 넣지 못했습니다.');
-          setRows((current) => current.map((row) => row.code === productCode ? { ...row, status: data.job?.status || 'queued' } : row));
-          setMessage(`${productCode} 영상 작업을 큐에 넣었습니다.`);
-          return { productCode, status: data.job?.status || 'queued' };
+          const status = data.job?.status || 'queued';
+          setRows((current) => current.map((row) => row.code === productCode ? { ...row, status } : row));
+          setMessage(data.deduplicated ? `${productCode} 영상 작업이 이미 큐에 있습니다.` : `${productCode} 영상 작업을 큐에 넣었습니다.`);
+          return { productCode, status, deduplicated: data.deduplicated === true };
         },
       }, { signal: lifecycle.signal });
       await context.registerTool({
@@ -112,12 +113,13 @@ export default function AdminPage() {
     if (!body.name?.trim() || !body.imageUrl?.trim()) { setBusy(false); setMessage('상품명과 대표 이미지를 입력하거나 상품 URL 자동 조회가 성공해야 등록할 수 있습니다.'); return; }
     const response = await fetch('/api/products', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     const data = await response.json() as { product?: Row; error?: string };
-    setBusy(false);
-    if (!response.ok || !data.product) { setMessage(data.error || '등록하지 못했습니다.'); return; }
+    if (!response.ok || !data.product) { setBusy(false); setMessage(data.error || '등록하지 못했습니다.'); return; }
     const jobResponse = await fetch('/api/jobs', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code: data.product.code }) });
-    setRows((current) => [{ ...data.product as Row, status: jobResponse.ok ? 'queued' : data.product?.status || 'draft' }, ...current]);
+    const jobData = await jobResponse.json() as { deduplicated?: boolean; error?: string; job?: { status?: string } };
+    setBusy(false);
+    setRows((current) => [{ ...data.product as Row, status: jobResponse.ok ? jobData.job?.status || 'queued' : data.product?.status || 'draft' }, ...current]);
     event.currentTarget.reset();
-    setMessage(jobResponse.ok ? `상품번호 ${data.product.code}로 등록하고 영상 작업을 큐에 넣었습니다.` : `상품번호 ${data.product.code}로 등록했지만 영상 작업을 큐에 넣지 못했습니다.`);
+    setMessage(jobResponse.ok ? (jobData.deduplicated ? `상품번호 ${data.product.code}의 영상 작업이 이미 큐에 있습니다.` : `상품번호 ${data.product.code}로 등록하고 영상 작업을 큐에 넣었습니다.`) : `상품번호 ${data.product.code}로 등록했지만 영상 작업을 큐에 넣지 못했습니다. ${jobData.error || ''}`);
   }
 
   async function loadMetadata() {
@@ -136,7 +138,7 @@ export default function AdminPage() {
     setMessage(data.affiliateLikeSource ? '정보를 채웠습니다. 입력 URL이 제휴/파트너 링크일 수 있으니 제휴 링크를 별도로 확인해 주세요.' : '상품명과 대표 이미지를 채웠습니다. 제휴 링크는 별도로 확인해 주세요.');
   }
 
-  async function createJob(code: string) { const response = await fetch('/api/jobs', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code }) }); const data = await response.json() as { error?: string }; setMessage(response.ok ? `${code} 영상 작업을 큐에 넣었습니다.` : data.error || '작업을 만들지 못했습니다.'); }
+  async function createJob(code: string) { const response = await fetch('/api/jobs', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code }) }); const data = await response.json() as { error?: string; deduplicated?: boolean; job?: { status?: string } }; if (response.ok) { setRows((current) => current.map((row) => row.code === code ? { ...row, status: data.job?.status || 'queued' } : row)); setMessage(data.deduplicated ? `${code} 영상 작업이 이미 큐에 있습니다.` : `${code} 영상 작업을 큐에 넣었습니다.`); } else setMessage(data.error || '작업을 만들지 못했습니다.'); }
 
   return <><SiteHeader /><main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12"><div className="mb-8 flex items-end justify-between gap-4"><div><p className="text-sm font-bold uppercase tracking-[.15em] text-[var(--primary)]">STUDIO CONTROL</p><h1 className="display mt-2 text-4xl font-black">상품 등록 & 영상 큐</h1><p className="mt-3 text-[var(--muted-foreground)]">내부 운영 화면 · Topview 인증정보는 이 웹서버에 저장하지 않습니다.</p></div><Link href="/" className="hidden rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-bold sm:block">공개 페이지 보기</Link></div><div className="grid gap-6 lg:grid-cols-[.8fr_1.2fr]"><form ref={formRef} onSubmit={submit} className="rounded-[1.5rem] border border-[var(--border)] bg-white p-6 shadow-sm"><h2 className="text-lg font-black">새 상품</h2><div className="mt-5 space-y-4">{[['sourceUrl','상품 URL','https://www.coupang.com/...'],['name','상품명','운영자가 확인할 이름'],['imageUrl','대표 이미지 URL','https://...'],['affiliateUrl','제휴 링크 URL','https://...']].map(([name,label,placeholder]) => <label key={name} className="block text-sm font-bold">{label}<input required={name === 'sourceUrl' || name === 'affiliateUrl'} name={name} placeholder={placeholder} className="mt-2 w-full rounded-xl border border-[var(--input)] bg-[var(--background)] px-4 py-3 font-normal outline-none focus:ring-2 focus:ring-[var(--ring)]" /></label>)}<button type="button" disabled={metadataBusy} onClick={loadMetadata} className="w-full rounded-xl border border-[var(--border)] bg-[var(--muted)] px-4 py-3 text-sm font-bold disabled:opacity-50">{metadataBusy ? '불러오는 중…' : '상품 URL 불러오기'}</button><p className="text-xs leading-5 text-[var(--muted-foreground)]">상품명·대표 이미지만 채웁니다. 원본 URL이 제휴 링크인지 확인하고, 제휴 링크는 별도로 입력해 주세요.</p><label className="block text-sm font-bold">설명<textarea name="description" placeholder="핵심 특징을 한두 문장으로 적어 주세요" rows={3} className="mt-2 w-full resize-none rounded-xl border border-[var(--input)] bg-[var(--background)] px-4 py-3 font-normal outline-none focus:ring-2 focus:ring-[var(--ring)]" /></label><button disabled={busy} className="w-full rounded-xl bg-[var(--primary)] px-4 py-3 font-bold text-white disabled:opacity-50">{busy ? '등록 중…' : '등록하고 영상 만들기'}</button>{message && <p aria-live="polite" className="rounded-xl bg-[var(--muted)] px-4 py-3 text-sm font-semibold">{message}</p>}</div></form><section className="rounded-[1.5rem] border border-[var(--border)] bg-white p-6 shadow-sm"><div className="flex items-center justify-between"><h2 className="text-lg font-black">최근 상품 / 작업 상태</h2><span className="text-xs text-[var(--muted-foreground)]">Topview adapter queue</span></div>{rows.length === 0 ? <div className="mt-5 rounded-xl bg-[var(--muted)] p-8 text-center text-sm text-[var(--muted-foreground)]">등록한 상품이 여기에 표시됩니다.</div> : <div className="mt-5 space-y-3">{rows.map((row) => <div key={row.code} className="flex flex-col gap-3 rounded-xl border border-[var(--border)] p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-bold text-[var(--primary)]">{row.code} · {row.marketplace}</p><p className="font-bold">{row.name}</p></div><div className="flex items-center gap-3"><span className="text-sm text-[var(--muted-foreground)]">{statuses[row.status] ?? row.status}</span><button onClick={() => createJob(row.code)} className="rounded-lg bg-[var(--muted)] px-3 py-2 text-sm font-bold">영상 만들기</button></div></div>)}</div>}</section></div></main></>;
 }

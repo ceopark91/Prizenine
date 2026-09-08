@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `generation_jobs_active_product_unique` ON `generation_jobs` (`product_id`) WHERE "generation_jobs"."status" in ('queued', 'claimed', 'running');

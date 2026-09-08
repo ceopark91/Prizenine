@@ -1,11 +1,12 @@
 import { getD1 } from '@/db';
 import { isSafeExternalUrl } from '@/lib/products';
-import { aspectRatioForTaskType, buildTopviewPrompt, isAllowedStatusTransition, productStatusForJobStatus, TOPVIEW_ADAPTER, TOPVIEW_DEFAULTS, type TopviewGenerationResult, type TopviewJobStatus } from '@/lib/topview-adapter';
+import { aspectRatioForTaskType, buildTopviewPrompt, isAllowedStatusTransition, isUniqueConstraintError, productStatusForJobStatus, TOPVIEW_ADAPTER, TOPVIEW_DEFAULTS, type TopviewGenerationResult, type TopviewJobStatus } from '@/lib/topview-adapter';
 
 const statuses: TopviewJobStatus[] = ['queued', 'claimed', 'running', 'succeeded', 'failed'];
 function validStatus(value: unknown): value is TopviewJobStatus { return typeof value === 'string' && statuses.includes(value as TopviewJobStatus); }
 function jobShape(row: any) { const taskType = row.image_url ? 'image_to_video' : 'text_to_video'; return { jobId: row.job_id, productId: row.product_id, code: row.code, name: row.name, sourceUrl: row.source_url, imageUrl: row.image_url, affiliateUrl: row.affiliate_url, prompt: row.prompt, status: row.job_status, taskId: row.task_id, canvasId: row.canvas_id, resultUrl: row.result_url, generationMode: TOPVIEW_DEFAULTS.generationMode, taskType, aspectRatio: aspectRatioForTaskType(taskType), duration: TOPVIEW_DEFAULTS.duration }; }
 const joinedSelect = 'SELECT j.id AS job_id, p.id AS product_id, p.code, p.name, p.source_url, p.image_url, p.affiliate_url, j.prompt, j.status AS job_status, j.task_id, j.canvas_id, j.result_url, j.error_message FROM generation_jobs j JOIN products p ON p.id = j.product_id';
+async function findActiveJob(db: any, productId: number) { const row = await db.prepare(`${joinedSelect} WHERE j.product_id = ?1 AND j.status IN ('queued', 'claimed', 'running') ORDER BY j.created_at DESC LIMIT 1`).bind(productId).first(); return row ? jobShape(row) : null; }
 
 export async function GET(request: Request) {
   const requested = new URL(request.url).searchParams.get('status');
@@ -24,12 +25,22 @@ export async function POST(request: Request) {
     const db = getD1();
     const product = await db.prepare('SELECT * FROM products WHERE code = ?1 LIMIT 1').bind(code).first<any>();
     if (!product) return Response.json({ error: '상품을 찾을 수 없습니다.' }, { status: 404 });
+    const existing = await findActiveJob(db, product.id);
+    if (existing) return Response.json({ job: existing, deduplicated: true }, { status: 200 });
     const timestamp = Date.now();
     const taskType = product.image_url ? 'image_to_video' : 'text_to_video';
     const prompt = buildTopviewPrompt({ productName: product.name, taskType });
-    const result = await db.prepare('INSERT INTO generation_jobs (product_id, status, prompt, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?4) RETURNING id').bind(product.id, 'queued', prompt, timestamp).first<any>();
+    let result: any;
+    try {
+      result = await db.prepare('INSERT INTO generation_jobs (product_id, status, prompt, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?4) RETURNING id').bind(product.id, 'queued', prompt, timestamp).first<any>();
+    } catch (error) {
+      if (!isUniqueConstraintError(error)) throw error;
+      const concurrent = await findActiveJob(db, product.id);
+      if (concurrent) return Response.json({ job: concurrent, deduplicated: true }, { status: 200 });
+      throw error;
+    }
     await db.prepare('UPDATE products SET status = ?1, updated_at = ?2 WHERE code = ?3').bind('queued', timestamp, code).run();
-    return Response.json({ job: { id: result?.id, code, status: 'queued', prompt, adapter: TOPVIEW_ADAPTER, generationMode: TOPVIEW_DEFAULTS.generationMode, taskType, aspectRatio: aspectRatioForTaskType(taskType), duration: TOPVIEW_DEFAULTS.duration } }, { status: 201 });
+    return Response.json({ job: { id: result?.id, jobId: result?.id, code, status: 'queued', prompt, adapter: TOPVIEW_ADAPTER, generationMode: TOPVIEW_DEFAULTS.generationMode, taskType, aspectRatio: aspectRatioForTaskType(taskType), duration: TOPVIEW_DEFAULTS.duration }, deduplicated: false }, { status: 201 });
   } catch { return Response.json({ error: '작업 큐를 만들지 못했습니다. D1 연결을 확인해 주세요.' }, { status: 500 }); }
 }
 

@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+@theme inline {
+  --color-background: var(--background); --color-foreground: var(--foreground); --color-card: var(--card); --color-card-foreground: var(--card-foreground); --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground); --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground); --color-border: var(--border); --color-input: var(--input); --color-ring: var(--ring); --radius-md: calc(var(--radius) * .8); --radius-lg: var(--radius); --radius-xl: calc(var(--radius) * 1.5);
+}
+:root { --background: oklch(.975 .012 88); --foreground: oklch(.19 .025 260); --card: oklch(1 0 0); --card-foreground: oklch(.19 .025 260); --primary: oklch(.34 .13 254); --primary-foreground: oklch(.99 .01 90); --muted: oklch(.94 .018 88); --muted-foreground: oklch(.48 .035 255); --border: oklch(.88 .025 88); --input: oklch(.86 .025 88); --ring: oklch(.55 .14 254); --radius: .9rem; }
+* { box-sizing: border-box; }
+html { min-width: 320px; }
+body { margin: 0; background: var(--background); color: var(--foreground); font-family: Arial, 'Noto Sans KR', sans-serif; }
+a { color: inherit; text-decoration: none; }
+button, input, textarea, select { font: inherit; }
+.display { letter-spacing: -.045em; }
+.grain { background-image: radial-gradient(circle at 10% 20%, rgba(40, 74, 150, .08) 0 1px, transparent 1.5px); background-size: 18px 18px; }

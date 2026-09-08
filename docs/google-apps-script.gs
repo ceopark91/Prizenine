@@ -12,7 +12,17 @@ function doPost(e) {
   var category = data.category || classify_(title + ' ' + (data.description || ''));
   var row = ['', category, title, [data.brand, data.description].filter(Boolean).join(' · '), url, data.image || ''];
   sheet.appendRow(row);
+  notify_(title, url, category);
   return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
+}
+
+function notify_(title, url, category) {
+  var props = PropertiesService.getScriptProperties();
+  var email = props.getProperty('NOTIFY_EMAIL');
+  var message = '[' + category + '] ' + title + '\n' + url;
+  if (email) MailApp.sendEmail(email, 'PrizeNine 상품 등록 완료', message);
+  var bot = props.getProperty('TELEGRAM_BOT_TOKEN'), chat = props.getProperty('TELEGRAM_CHAT_ID');
+  if (bot && chat) UrlFetchApp.fetch('https://api.telegram.org/bot' + bot + '/sendMessage', {method:'post', contentType:'application/json', payload: JSON.stringify({chat_id:chat, text:message}), muteHttpExceptions:true});
 }
 
 function classify_(text) {

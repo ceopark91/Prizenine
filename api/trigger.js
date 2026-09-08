@@ -13,7 +13,13 @@ module.exports = async function handler(req, res) {
   const body = typeof req.body === 'string' ? (() => { try { return JSON.parse(req.body); } catch (_) { return { text: req.body }; } })() : (req.body || {});
   const url = extractUrl(body.url || body.text || body.message?.text || body.message || body.content || body.body);
   if (!url) return res.status(400).json({ error: '상품 URL을 찾을 수 없습니다.' });
-  const payload = { url, receivedAt: new Date().toISOString(), source: body.source || 'trigger' };
+  let research = {};
+  try {
+    const origin = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `https://${req.headers.host}`;
+    const result = await fetch(`${origin}/api/research`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url }) });
+    if (result.ok) research = await result.json();
+  } catch (_) {}
+  const payload = { ...research, url, receivedAt: new Date().toISOString(), source: body.source || 'trigger' };
   if (process.env.GOOGLE_APPS_SCRIPT_URL) {
     const response = await fetch(process.env.GOOGLE_APPS_SCRIPT_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
     if (!response.ok) return res.status(502).json({ error: 'Google Sheets 전달 실패' });

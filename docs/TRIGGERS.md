@@ -5,7 +5,7 @@ Vercel 배포 주소의 `POST /api/trigger`로 상품 URL을 보내면 기존 in
 필수 환경변수:
 
 - `TRIGGER_SECRET` (없으면 `INGEST_TOKEN` 사용)
-- `GOOGLE_APPS_SCRIPT_URL` (설정 시 `{url, receivedAt, source}`를 시트 Apps Script로 전달)
+- `GOOGLE_APPS_SCRIPT_URL` (설정 시 조사된 상품 필드와 URL을 시트 Apps Script로 전달; 예제는 `google-apps-script.gs`)
 
 인증 헤더: `Authorization: Bearer <TRIGGER_SECRET>` 또는 `X-Trigger-Secret`.
 

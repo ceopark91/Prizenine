@@ -18,7 +18,8 @@ module.exports = async function handler(req, res) {
   const url = extractUrl(body.url || body.text || body.message || body.content);
   if (!url) return res.status(400).json({ error: '상품 URL을 찾을 수 없습니다.' });
   if (!/^https?:\/\//i.test(url)) return res.status(400).json({ error: 'HTTP URL만 허용됩니다.' });
-  const payload = { url, receivedAt: new Date().toISOString(), source: body.source || 'api' };
+  const reviews = Array.isArray(body.reviews) ? body.reviews.slice(0, 100) : undefined;
+  const payload = { url, receivedAt: new Date().toISOString(), source: body.source || 'api', reviewMode: reviews ? 'browser-session' : 'url-only', reviews };
   if (process.env.GOOGLE_APPS_SCRIPT_URL) {
     const response = await fetch(process.env.GOOGLE_APPS_SCRIPT_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
     if (!response.ok) return res.status(502).json({ error: 'Google Sheets 전달 실패' });

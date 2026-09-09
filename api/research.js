@@ -25,7 +25,7 @@ function reviewAnalysis(reviews) {
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const body = typeof req.body === 'string' ? (() => { try { return JSON.parse(req.body); } catch (_) { return {}; } })() : (req.body || {});
-  if (Array.isArray(body.reviews)) return res.status(200).json({ source: body.url || 'browser-session', mode: 'browser-session', analysis: reviewAnalysis(body.reviews) });
+  if (Array.isArray(body.reviews)) return res.status(200).json({ source: body.url || 'browser-session', mode: 'browser-session', product: body.product || {}, analysis: reviewAnalysis(body.reviews.slice(0, 100)) });
   let target;
   try { target = new URL(body.url); } catch (_) { return res.status(400).json({ error: '유효한 URL이 필요합니다.' }); }
   if (!/^https?:$/.test(target.protocol)) return res.status(400).json({ error: 'HTTP URL만 허용됩니다.' });

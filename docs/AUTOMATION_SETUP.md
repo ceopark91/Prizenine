@@ -6,6 +6,14 @@
 .\scripts\setup-automation-gui.ps1
 ```
 
+저장 후 테스트하려면:
+
+```powershell
+.\scripts\test-trigger.ps1
+```
+
+상품 URL을 입력했을 때 `202`와 `queued`가 나오면 트리거가 정상 작동한 것입니다. Vercel 환경변수에도 같은 `TRIGGER_SECRET`을 먼저 등록해야 합니다.
+
 프로젝트 루트에서 PowerShell을 열고 실행합니다.
 
 ```powershell

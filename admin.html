@@ -31,6 +31,16 @@
           <p id="form-status" class="sheet-notice" role="status" aria-live="polite"></p>
         </form>
       </section>
+      <section class="admin-panel">
+        <div class="panel-heading"><div><p class="eyebrow">BROWSER SESSION</p><h2>리뷰 분석</h2></div><span class="panel-status"><span></span> USER SESSION ONLY</span></div>
+        <p class="sheet-notice">쿠팡 페이지를 브라우저에서 연 뒤, 허용된 세션에서 확인한 리뷰를 JSON으로 붙여넣으세요. 서버가 쿠팡에 자동 접속하지 않습니다.</p>
+        <form id="review-form">
+          <label>상품 URL<input name="url" type="url" required placeholder="https://www.coupang.com/vp/products/..." /></label>
+          <label>리뷰 JSON<textarea name="reviews" required rows="7" placeholder='[{"id":"r1","text":"사용하기 편하지만 소음이 있어요.","rating":4}]'></textarea></label>
+          <button class="primary-button" type="submit">리뷰 분석하기 <i data-lucide="scan-search"></i></button>
+          <pre id="review-result" class="sheet-notice" role="status" aria-live="polite"></pre>
+        </form>
+      </section>
       <section class="saved-section"><div class="panel-heading"><div><p class="eyebrow">CURRENT INDEX</p><h2>등록된 제품</h2></div><span id="saved-count">0 ITEMS</span></div><div class="saved-list" id="saved-list"></div><p class="empty-state" id="empty-state">아직 추가한 제품이 없습니다.</p></section>
       <footer><span>관리자 작업 화면</span><a href="/">방문자 페이지 보기 <i data-lucide="arrow-up-right"></i></a></footer>
     </main>

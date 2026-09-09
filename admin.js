@@ -4,6 +4,8 @@ const savedList = document.querySelector('#saved-list');
 const emptyState = document.querySelector('#empty-state');
 const savedCount = document.querySelector('#saved-count');
 const formStatus = document.querySelector('#form-status');
+const reviewForm = document.querySelector('#review-form');
+const reviewResult = document.querySelector('#review-result');
 let savedProducts = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
 function renderSavedProducts() {
@@ -32,6 +34,21 @@ savedList.addEventListener('click', (event) => {
   savedProducts.splice(Number(button.dataset.index), 1);
   localStorage.setItem(storageKey, JSON.stringify(savedProducts));
   renderSavedProducts();
+});
+
+reviewForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const data = new FormData(reviewForm);
+  try {
+    const reviews = JSON.parse(String(data.get('reviews') || ''));
+    if (!Array.isArray(reviews)) throw new Error('리뷰 JSON은 배열이어야 합니다.');
+    reviewResult.textContent = '브라우저 세션 리뷰를 분석 중입니다…';
+    const response = await fetch('/api/research', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url: data.get('url'), reviews }) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || '리뷰 분석에 실패했습니다.');
+    const summary = result.analysis;
+    reviewResult.textContent = `총 ${summary.total}건 분석\n긍정 ${summary.sentiment.positive} · 부정 ${summary.sentiment.negative} · 혼합 ${summary.sentiment.mixed} · 중립 ${summary.sentiment.neutral}\n\n` + summary.reviews.map((review) => `[${review.sentiment}] ${review.text}`).join('\n');
+  } catch (error) { reviewResult.textContent = error instanceof Error ? error.message : '리뷰 JSON을 확인해 주세요.'; }
 });
 
 renderSavedProducts();

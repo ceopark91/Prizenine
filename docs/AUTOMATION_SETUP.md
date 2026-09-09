@@ -1,5 +1,11 @@
 # 자동화 설정
 
+초보자는 GUI 설정기를 실행하세요.
+
+```powershell
+.\scripts\setup-automation-gui.ps1
+```
+
 프로젝트 루트에서 PowerShell을 열고 실행합니다.
 
 ```powershell

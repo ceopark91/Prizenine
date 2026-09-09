@@ -36,6 +36,7 @@ function doGet(e) {
 function doPost(e) {
   var data = JSON.parse((e && e.postData && e.postData.contents) || '{}');
   if ((data.action || 'enqueue') === 'enqueue') return json_(enqueue_(extractUrl_(data.url || data.text || ''), data.source || 'api'));
+  if (data.action === 'claim') return json_(claim_(data.jobId));
   if (data.action === 'complete') return json_(complete_(data));
   if (data.action === 'fail') return json_(updateJob_(data.jobId,'failed','',data.error || 'unknown'));
   return json_({ok:false,error:'unknown action'});
@@ -59,6 +60,13 @@ function complete_(data) {
   updateJob_(data.jobId,'done',number,'');
   notify_(number,data.productName || data.title || '',data.partnerUrl || data.url || '');
   return {ok:true,status:'done',productNumber:number};
+}
+
+function claim_(id){
+  var q=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(QUEUE_SHEET);if(!q)return {ok:false,error:'queue not found'};
+  var ids=q.getRange(2,1,Math.max(q.getLastRow()-1,1),1).getValues();
+  for(var i=0;i<ids.length;i++)if(ids[i][0]===id){var state=q.getRange(i+2,3).getValue();if(state!=='pending')return {ok:false,status:state};q.getRange(i+2,3).setValue('processing');return {ok:true,status:'processing',jobId:id,url:q.getRange(i+2,2).getValue()};}
+  return {ok:false,error:'job not found'};
 }
 
 function updateJob_(id,status,number,error){var q=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(QUEUE_SHEET);if(!q)return {ok:false};var ids=q.getRange(2,1,Math.max(q.getLastRow()-1,1),1).getValues();for(var i=0;i<ids.length;i++)if(ids[i][0]===id){q.getRange(i+2,3,1,5).setValues([[status,q.getRange(i+2,4).getValue(),new Date(),number,error]]);return {ok:true,status:status};}return {ok:false,error:'job not found'};}

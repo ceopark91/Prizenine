@@ -54,9 +54,16 @@ function enqueue_(url, source) {
 
 function complete_(data) {
   var ss=SpreadsheetApp.getActiveSpreadsheet(), main=ss.getSheetByName(MAIN_SHEET) || ss.getSheets()[0];
-  var row=['',data.category || '기타',data.productName || data.title || '',[data.brand,data.description].filter(Boolean).join(' · '),data.partnerUrl || data.url || '',data.imageUrl || data.image || ''];
+  // 제품번호는 시트의 기존 최대 번호 + 1로 직접 지정합니다.
+  // (ARRAYFORMULA가 이미 있어도 appendRow 시 새 행에 자동 확장되지 않는 경우가 있어 안전하게 처리)
+  var last = Math.max(main.getLastRow(), 1), number = 0;
+  if (last >= 2) {
+    var nums = main.getRange(2, 1, last - 1, 1).getValues();
+    nums.forEach(function(r){ var n = Number(r[0]); if (isFinite(n) && n > number) number = n; });
+  }
+  number = number + 1;
+  var row=[number,data.category || '기타',data.productName || data.title || '',[data.brand,data.description].filter(Boolean).join(' · '),data.partnerUrl || data.url || '',data.imageUrl || data.image || ''];
   main.appendRow(row); SpreadsheetApp.flush();
-  var number=main.getRange(main.getLastRow(),1).getDisplayValue();
   updateJob_(data.jobId,'done',number,'');
   notify_(number,data.productName || data.title || '',data.partnerUrl || data.url || '');
   return {ok:true,status:'done',productNumber:number};

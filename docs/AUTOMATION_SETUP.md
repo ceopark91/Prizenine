@@ -2,6 +2,8 @@
 
 초보자는 GUI 설정기를 실행하세요.
 
+프로젝트 폴더의 `자동화-설정-실행.bat` 파일을 더블클릭해도 됩니다. 창에서 URL을 입력하고 `테스트 실행`을 누르면 됩니다.
+
 ```powershell
 .\scripts\setup-automation-gui.ps1
 ```

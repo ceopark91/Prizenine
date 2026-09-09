@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
   if (!/^https?:$/.test(target.protocol)) return res.status(400).json({ error: 'HTTP URL만 허용됩니다.' });
   try {
     const response = await fetch(target, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; PrizeNResearch/1.0)' }, signal: AbortSignal.timeout(12000) });
-    if (!response.ok) return res.status(response.status === 403 ? 409 : 502).json({ error: `상품 페이지 응답 오류 (${response.status})`, code: response.status === 403 ? 'blocked_automated_access' : 'fetch_failed', nextSteps: response.status === 403 ? ['official_api', 'browser_session', 'approved_public_source', 'approved_coupang_adapter'] : [] });
+    if (!response.ok) return res.status(response.status === 403 ? 409 : 502).json({ error: `상품 페이지 응답 오류 (${response.status})`, code: response.status === 403 ? 'blocked_automated_access' : 'fetch_failed', nextSteps: response.status === 403 ? ['official_api', 'browser_session', 'approved_public_source', 'approved_marketplace_adapter'] : [] });
     const html = await response.text();
     const product = jsonLd(html);
     const offers = Array.isArray(product.offers) ? product.offers[0] : (product.offers || {});

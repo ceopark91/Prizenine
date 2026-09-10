@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PrizeNine 작업 상황판</title>
+  <style>
+    :root{font-family:Arial,"Noto Sans KR",sans-serif;color:#172033;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1180px;margin:auto;padding:28px 18px 50px}.top{display:flex;justify-content:space-between;align-items:end;margin-bottom:24px}.eyebrow{font-size:12px;letter-spacing:.14em;color:#6b7280;font-weight:700}.top h1{margin:6px 0 0;font-size:30px}.live{font-size:13px;color:#12805c;background:#e8f8f1;padding:8px 12px;border-radius:999px}.panel{background:#fff;border:1px solid #e4e9f1;border-radius:18px;box-shadow:0 10px 30px #1720330b;padding:20px;margin-bottom:18px}.form{display:flex;gap:10px}.form input{flex:1;min-width:0;border:1px solid #d7deea;border-radius:10px;padding:14px;font-size:15px}.form button{border:0;background:#2563eb;color:#fff;font-weight:700;border-radius:10px;padding:0 22px;cursor:pointer}.form button:disabled{opacity:.6}.hint{font-size:12px;color:#778196;margin:10px 0 0}.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.toolbar h2{font-size:18px;margin:0}.refresh{border:1px solid #d7deea;background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}.table th{background:#f8fafc;color:#667085;text-align:left;font-weight:700}.table th,.table td{padding:13px 12px;border-bottom:1px solid #edf0f5;vertical-align:top}.url{max-width:360px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#2563eb}.badge{display:inline-flex;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:700}.done{background:#e8f8f1;color:#087443}.processing{background:#fff5dc;color:#9a6700}.failed{background:#ffe9e9;color:#b42318}.pending{background:#eef2ff;color:#4338ca}.empty{text-align:center;color:#8791a5;padding:36px}.status{font-size:13px;margin-top:10px;color:#526071}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top"><div><div class="eyebrow">PRIZENINE / CONTROL ROOM</div><h1>제품 광고 자동화 상황판</h1></div><div class="live">● 1분 자동 확인</div></header>
+  <section class="panel"><div class="eyebrow">NEW PRODUCT URL</div><form class="form" id="enqueue"><input id="url" type="url" required placeholder="쿠팡 상품 URL을 붙여넣으세요" /><button>제품 접수</button></form><p class="hint">접수 후 제품번호 선확정 → 상품 분석 → 30초 영상 제작 순서로 처리됩니다.</p><div class="status" id="formStatus"></div></section>
+  <section class="panel"><div class="toolbar"><h2>최근 접수 주소</h2><button class="refresh" id="refresh">새로고침</button></div><div class="table-wrap"><table class="table"><thead><tr><th>접수시각</th><th>상품 URL</th><th>상태</th><th>제품번호</th><th>현재 단계</th><th>오류</th></tr></thead><tbody id="rows"><tr><td class="empty" colspan="6">불러오는 중…</td></tr></tbody></table></div></section>
+</main>
+<script>
+const GS='https://script.google.com/macros/s/AKfycbz6IEZALXcT3JEUuQ61ghtFYHrFgU_Y55HNHWwPPQMkBLgtTQgZPc5W-lwlLOCYo3CaxQ/exec';
+const $=s=>document.querySelector(s); const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function fmt(v){if(!v)return '-';const d=new Date(v);return isNaN(d)?esc(v):d.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function badge(s){const key=String(s||'').toLowerCase();const cls=key==='done'?'done':key==='failed'?'failed':key==='processing'?'processing':'pending';const label=key==='done'?'완료':key==='failed'?'실패':key==='processing'?'진행 중':'대기';return `<span class="badge ${cls}">${label}</span>`;}
+async function load(){try{const r=await fetch(GS+'?action=dashboard&ts='+Date.now());const j=await r.json();const list=j.jobs||[];$('#rows').innerHTML=list.length?list.map(x=>`<tr><td>${fmt(x.receivedAt)}</td><td><a class="url" href="${esc(x.url)}" target="_blank" rel="noreferrer">${esc(x.url)}</a></td><td>${badge(x.status)}</td><td>${esc(x.productNumber||'-')}</td><td>${esc(x.stage||'-')}</td><td>${esc(x.error||'-')}</td></tr>`).join(''):`<tr><td class="empty" colspan="6">접수된 작업이 없습니다.</td></tr>`;}catch(e){$('#rows').innerHTML='<tr><td class="empty" colspan="6">GS 연결에 실패했습니다.</td></tr>';}}
+$('#enqueue').addEventListener('submit',async e=>{e.preventDefault();const input=$('#url'),btn=e.submitter;btn.disabled=true;$('#formStatus').textContent='접수 중…';try{const r=await fetch(GS+'?action=enqueue&source=dashboard&url='+encodeURIComponent(input.value)+'&ts='+Date.now());const j=await r.json();if(!j.ok)throw Error(j.error||'접수 실패');$('#formStatus').textContent=j.duplicate?'이미 접수된 주소입니다.':'접수 완료되었습니다.';input.value='';await load();}catch(err){$('#formStatus').textContent=err.message;}finally{btn.disabled=false;}});
+$('#refresh').addEventListener('click',load);load();setInterval(load,60000);
+</script>
+</body></html>

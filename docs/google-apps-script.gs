@@ -28,11 +28,23 @@ function doGet(e) {
   if (action === 'enqueue') return json_(enqueue_(extractUrl_(e.parameter.url || e.parameter.text || ''), e.parameter.source || 'get-api'));
   if (action === 'pending') reclaimStaleProcessing_();
   if (action === 'form') return json_({ok:true, formUrl:PropertiesService.getScriptProperties().getProperty('FORM_URL') || ''});
+  if (action === 'dashboard') return json_(dashboard_());
   var q = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(QUEUE_SHEET);
   if (!q || q.getLastRow() < 2) return json_({ok:true, jobs:[]});
   var rows = q.getRange(2,1,q.getLastRow()-1,8).getValues();
   var jobs = rows.filter(function(r){return r[2] === 'pending';}).slice(0,10).map(function(r){return {jobId:r[0],url:r[1],status:r[2],receivedAt:r[3],stage:r[7] || '대기'};});
   return json_({ok:true,jobs:jobs});
+}
+
+function dashboard_() {
+  var q = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(QUEUE_SHEET);
+  if (!q || q.getLastRow() < 2) return {ok:true, jobs:[]};
+  var rows = q.getRange(2,1,q.getLastRow()-1,8).getValues();
+  var jobs = rows.filter(function(r){ return r[0] && r[1]; }).map(function(r){
+    return {jobId:r[0], url:r[1], status:r[2] || '', receivedAt:r[3] || '', processedAt:r[4] || '', productNumber:r[5] || '', error:r[6] || '', stage:r[7] || ''};
+  });
+  jobs.sort(function(a,b){ return new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime(); });
+  return {ok:true, jobs:jobs};
 }
 
 // 작업자가 중단되거나 컴퓨터가 꺼져도 15분 후 자동 재시도합니다.
@@ -55,6 +67,7 @@ function doPost(e) {
   var data = JSON.parse((e && e.postData && e.postData.contents) || '{}');
   if ((data.action || 'enqueue') === 'enqueue') return json_(enqueue_(extractUrl_(data.url || data.text || ''), data.source || 'api'));
   if (data.action === 'claim') return json_(claim_(data.jobId));
+  if (data.action === 'reserve') return json_(reserveProductNumber_(data.jobId));
   if (data.action === 'stage') return json_(setStage_(data.jobId, data.stage || '처리 중'));
   if (data.action === 'complete') return json_(complete_(data));
   if (data.action === 'fail') return json_(updateJob_(data.jobId,'failed','',data.error || 'unknown'));
@@ -85,10 +98,40 @@ function complete_(data) {
   }
   main.getRange(writeRow, 1, 1, row.length).setValues([row]);
   SpreadsheetApp.flush();
-  var number = main.getRange(writeRow, 1).getDisplayValue();
+  var number = data.productNumber || getReservedProductNumber_(data.jobId) || main.getRange(writeRow, 1).getDisplayValue();
   updateJob_(data.jobId,'done',number,'');
   notify_(number,data.productName || data.title || '',data.partnerUrl || data.url || '');
   return {ok:true,status:'done',productNumber:number};
+}
+
+// 영상 제작 전에 제품번호를 예약한다. 음성·자막 CTA에 이 번호를 사용할 수 있다.
+function reserveProductNumber_(jobId) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+  var q=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(QUEUE_SHEET);
+  if(!q)return {ok:false,error:'queue not found'};
+  var ids=q.getRange(2,1,Math.max(q.getLastRow()-1,1),1).getValues();
+  for(var i=0;i<ids.length;i++) if(ids[i][0]===jobId){
+    var existing=q.getRange(i+2,6).getDisplayValue();
+    if(existing) return {ok:true,jobId:jobId,productNumber:existing,reserved:true};
+    var main=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(MAIN_SHEET) || SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+    var vals=main.getRange(2,1,Math.max(main.getLastRow()-1,1),1).getDisplayValues();
+    var max=0; vals.forEach(function(r){var n=parseInt(String(r[0]).replace(/[^0-9]/g,''),10);if(!isNaN(n)&&n>max)max=n;});
+    var next=String(max+1);
+    q.getRange(i+2,6).setValue(next);
+    q.getRange(i+2,8).setValue('제품번호 '+next+' 예약 완료');
+    return {ok:true,jobId:jobId,productNumber:next,reserved:true};
+  }
+  return {ok:false,error:'job not found'};
+  } finally { lock.releaseLock(); }
+}
+
+function getReservedProductNumber_(jobId){
+  var q=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(QUEUE_SHEET); if(!q)return '';
+  var ids=q.getRange(2,1,Math.max(q.getLastRow()-1,1),1).getValues();
+  for(var i=0;i<ids.length;i++) if(ids[i][0]===jobId)return q.getRange(i+2,6).getDisplayValue();
+  return '';
 }
 
 function claim_(id){

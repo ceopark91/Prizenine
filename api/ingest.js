@@ -1,5 +1,6 @@
 const URL_RE = /https?:\/\/[^\s<>"']+/gi;
 const { APPS_SCRIPT_URL } = require('../config/apps-script');
+const { postAppsScript } = require('./apps-script-post');
 
 function json(status, body) {
   return { status, headers: { 'content-type': 'application/json; charset=utf-8' }, body: JSON.stringify(body) };
@@ -23,7 +24,7 @@ module.exports = async function handler(req, res) {
   const payload = { url, receivedAt: new Date().toISOString(), source: body.source || 'api', reviewMode: reviews ? 'browser-session' : 'url-only', reviews };
   const sheetUrl = APPS_SCRIPT_URL;
   if (sheetUrl) {
-    const response = await fetch(sheetUrl, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+    const response = await postAppsScript(sheetUrl, payload);
     if (!response.ok) return res.status(502).json({ error: 'Google Sheets 전달 실패' });
   }
   return res.status(202).json({ ok: true, status: 'queued', url, forwardedToSheet: Boolean(sheetUrl) });

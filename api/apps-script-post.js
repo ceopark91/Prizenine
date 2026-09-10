@@ -3,7 +3,10 @@
 // is not lost (a normal 302-follow can turn it into an empty GET/POST).
 async function postAppsScript(url, payload) {
   const body = JSON.stringify(payload);
-  const headers = { 'content-type': 'application/json; charset=utf-8' };
+  const headers = {
+    'content-type': 'application/json; charset=utf-8',
+    'content-length': String(Buffer.byteLength(body)),
+  };
   let response = await fetch(url, { method: 'POST', headers, body, redirect: 'manual' });
   if (response.status >= 300 && response.status < 400) {
     const location = response.headers.get('location');

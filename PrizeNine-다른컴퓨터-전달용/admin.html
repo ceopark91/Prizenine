@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>PrizeN 관리자</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="admin.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body>
+    <main class="admin-shell">
+      <header class="admin-header">
+        <a class="brand" href="/" aria-label="PrizeN 홈"><span class="brand-mark"><i data-lucide="sparkles"></i></span><span>PrizeN<span class="brand-dot">.</span></span></a>
+        <span class="admin-badge"><i data-lucide="shield-check"></i> ADMIN</span>
+      </header>
+      <section class="admin-intro"><p class="eyebrow">CONTROL ROOM / 2026</p><h1>제품을<br /><em>추가하세요.</em></h1><p>구글시트에 제품 번호, 상품명,<br />구매 링크를 입력하면 방문자 화면에 정리됩니다.</p></section>
+      <section class="admin-panel">
+        <div class="panel-heading"><div><p class="eyebrow">NEW PRODUCT</p><h2>제품 등록</h2></div><span class="panel-status"><span></span> GOOGLE SHEET</span></div>
+        <p class="sheet-notice">상품 링크를 입력하면 제품번호는 구글시트 배열수식이 자동으로 부여합니다.</p>
+        <form id="product-form">
+          <label>상품명<input name="title" required placeholder="예: 책상 위 무드등" /></label>
+          <label>카테고리<select name="category"><option>생활</option><option>테크</option><option>뷰티</option></select></label>
+          <label>브랜드 / 제품 설명<input name="product" required placeholder="예: 무드등 · 브랜드명" /></label>
+          <label>파트너스 상품 링크<input name="link" type="url" required placeholder="쿠팡·테무·알리 상품 URL" /></label>
+          <label>상품 이미지 URL<input name="image" type="url" placeholder="https://... (선택)" /></label>
+          <button class="primary-button" type="submit">제품 목록에 저장 <i data-lucide="arrow-up-right"></i></button>
+          <p id="form-status" class="sheet-notice" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+      <section class="admin-panel">
+        <div class="panel-heading"><div><p class="eyebrow">BROWSER SESSION</p><h2>리뷰 분석</h2></div><span class="panel-status"><span></span> USER SESSION ONLY</span></div>
+        <p class="sheet-notice">쿠팡 페이지를 브라우저에서 연 뒤, 허용된 세션에서 확인한 리뷰를 JSON으로 붙여넣으세요. 서버가 쿠팡에 자동 접속하지 않습니다.</p>
+        <form id="review-form">
+          <label>상품 URL<input name="url" type="url" required placeholder="https://www.coupang.com/vp/products/..." /></label>
+          <label>리뷰 JSON<textarea name="reviews" required rows="7" placeholder='[{"id":"r1","text":"사용하기 편하지만 소음이 있어요.","rating":4}]'></textarea></label>
+          <button class="primary-button" type="submit">리뷰 분석하기 <i data-lucide="scan-search"></i></button>
+          <pre id="review-result" class="sheet-notice" role="status" aria-live="polite"></pre>
+        </form>
+      </section>
+      <section class="saved-section"><div class="panel-heading"><div><p class="eyebrow">CURRENT INDEX</p><h2>등록된 제품</h2></div><span id="saved-count">0 ITEMS</span></div><div class="saved-list" id="saved-list"></div><p class="empty-state" id="empty-state">아직 추가한 제품이 없습니다.</p></section>
+      <footer><span>관리자 작업 화면</span><a href="/">방문자 페이지 보기 <i data-lucide="arrow-up-right"></i></a></footer>
+    </main>
+    <script src="admin.js"></script>
+  </body>
+</html>

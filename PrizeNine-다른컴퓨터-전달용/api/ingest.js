@@ -1,5 +1,4 @@
 const URL_RE = /https?:\/\/[^\s<>"']+/gi;
-const { APPS_SCRIPT_URL } = require('../config/apps-script');
 
 function json(status, body) {
   return { status, headers: { 'content-type': 'application/json; charset=utf-8' }, body: JSON.stringify(body) };
@@ -21,10 +20,9 @@ module.exports = async function handler(req, res) {
   if (!/^https?:\/\//i.test(url)) return res.status(400).json({ error: 'HTTP URL만 허용됩니다.' });
   const reviews = Array.isArray(body.reviews) ? body.reviews.slice(0, 100) : undefined;
   const payload = { url, receivedAt: new Date().toISOString(), source: body.source || 'api', reviewMode: reviews ? 'browser-session' : 'url-only', reviews };
-  const sheetUrl = APPS_SCRIPT_URL;
-  if (sheetUrl) {
-    const response = await fetch(sheetUrl, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+  if (process.env.GOOGLE_APPS_SCRIPT_URL) {
+    const response = await fetch(process.env.GOOGLE_APPS_SCRIPT_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
     if (!response.ok) return res.status(502).json({ error: 'Google Sheets 전달 실패' });
   }
-  return res.status(202).json({ ok: true, status: 'queued', url, forwardedToSheet: Boolean(sheetUrl) });
+  return res.status(202).json({ ok: true, status: 'queued', url, forwardedToSheet: Boolean(process.env.GOOGLE_APPS_SCRIPT_URL) });
 };

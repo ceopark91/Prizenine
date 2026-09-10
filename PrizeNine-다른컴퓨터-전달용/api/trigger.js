@@ -1,5 +1,4 @@
 const URL_RE = /https?:\/\/[^\s<>"']+/i;
-const { APPS_SCRIPT_URL } = require('../config/apps-script');
 
 function extractUrl(value) {
   const match = String(value || '').match(URL_RE);
@@ -21,10 +20,9 @@ module.exports = async function handler(req, res) {
     if (result.ok) research = await result.json();
   } catch (_) {}
   const payload = { ...research, url, receivedAt: new Date().toISOString(), source: body.source || 'trigger' };
-  const sheetUrl = APPS_SCRIPT_URL;
-  if (sheetUrl) {
-    const response = await fetch(sheetUrl, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+  if (process.env.GOOGLE_APPS_SCRIPT_URL) {
+    const response = await fetch(process.env.GOOGLE_APPS_SCRIPT_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
     if (!response.ok) return res.status(502).json({ error: 'Google Sheets 전달 실패' });
   }
-  return res.status(202).json({ ok: true, status: 'queued', url, forwardedToSheet: Boolean(sheetUrl) });
+  return res.status(202).json({ ok: true, status: 'queued', url, forwardedToSheet: Boolean(process.env.GOOGLE_APPS_SCRIPT_URL) });
 };

@@ -2,7 +2,7 @@
 
 현재는 생성 한도를 아끼는 `TEST_30S` 모드다. 최종 영상은 9:16 세로형, 목표 30초이며 28~30초 범위를 넘기지 않는다. 최종 목표는 시청자가 프로필 링크에서 영상의 제품번호를 검색해 구매하도록 유도하는 것이다.
 
-공식 Google Apps Script 엔드포인트: https://script.google.com/macros/s/AKfycbz6IEZALXcT3JEUuQ61ghtFYHrFgU_Y55HNHWwPPQMkBLgtTQgZPc5W-lwlLOCYo3CaxQ/exec
+공식 Google Apps Script 엔드포인트: https://script.google.com/macros/s/AKfycbxv3e34upUDpF315N7M5hhsn8MR0c6OG91cMyctEiMxmkg3KNQMiWw9zvePNFImOOrMPg/exec
 
 ## 최우선 강제 규칙
 

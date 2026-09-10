@@ -2,7 +2,7 @@
 
 최종 사업 목표는 시청자가 광고 리뷰 영상을 본 뒤 프로필 링크로 이동하고, 영상에서 안내한 제품번호를 검색해 해당 상품을 구매하여 리워드가 발생하도록 만드는 것이다. 단순 영상 생성이나 캐릭터 소개 영상은 완료가 아니다.
 
-공식 Google Apps Script 엔드포인트: https://script.google.com/macros/s/AKfycbz6IEZALXcT3JEUuQ61ghtFYHrFgU_Y55HNHWwPPQMkBLgtTQgZPc5W-lwlLOCYo3CaxQ/exec
+공식 Google Apps Script 엔드포인트: https://script.google.com/macros/s/AKfycbxv3e34upUDpF315N7M5hhsn8MR0c6OG91cMyctEiMxmkg3KNQMiWw9zvePNFImOOrMPg/exec
 
 ## 최우선 강제 규칙: 제품번호 선확정
 

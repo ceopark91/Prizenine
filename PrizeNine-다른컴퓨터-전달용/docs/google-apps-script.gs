@@ -25,6 +25,7 @@ function onFormSubmit(e) {
 
 function doGet(e) {
   var action = (e && e.parameter && e.parameter.action) || 'pending';
+  if (action === 'enqueue') return json_(enqueue_(extractUrl_(e.parameter.url || e.parameter.text || ''), e.parameter.source || 'get-api'));
   if (action === 'pending') reclaimStaleProcessing_();
   if (action === 'form') return json_({ok:true, formUrl:PropertiesService.getScriptProperties().getProperty('FORM_URL') || ''});
   var q = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(QUEUE_SHEET);

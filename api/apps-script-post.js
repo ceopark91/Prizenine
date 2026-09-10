@@ -13,6 +13,14 @@ async function postAppsScript(url, payload) {
     if (!location) return response;
     response = await fetch(location, { method: 'POST', headers, body });
   }
+  if (!response.ok && payload && payload.url) {
+    const q = new URL(url);
+    q.searchParams.set('action', 'enqueue');
+    q.searchParams.set('url', payload.url);
+    q.searchParams.set('source', payload.source || 'api-get-fallback');
+    const fallback = await fetch(q, { method: 'GET' });
+    if (fallback.ok) return fallback;
+  }
   return response;
 }
 

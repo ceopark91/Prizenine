@@ -74,7 +74,7 @@ function enqueue_(url, source) {
 function complete_(data) {
   var ss=SpreadsheetApp.getActiveSpreadsheet(), main=ss.getSheetByName(MAIN_SHEET) || ss.getSheets()[0];
   // A열은 ARRAYFORMULA가 관리하므로 제품번호를 직접 쓰지 않습니다.
-  var row=['',data.category || '기타',data.productName || data.title || '',[data.brand,data.description].filter(Boolean).join(' · '),data.partnerUrl || data.url || '',data.imageUrl || data.image || ''];
+  var row=['',data.category || '기타',data.productName || data.title || '',[data.brand,data.description,data.dimensions ? ('규격·크기: ' + data.dimensions) : ''].filter(Boolean).join(' · '),data.partnerUrl || data.url || '',data.imageUrl || data.image || ''];
   // 아래쪽에 남은 오래된 데이터가 있어도, 연속된 상품목록의 첫 빈 행에 기록합니다.
   var scanRows = Math.max(main.getMaxRows() - 1, 1);
   var categories = main.getRange(2, 2, scanRows, 1).getDisplayValues();

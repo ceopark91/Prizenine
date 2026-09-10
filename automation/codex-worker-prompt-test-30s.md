@@ -4,13 +4,46 @@
 
 공식 Google Apps Script 엔드포인트: https://script.google.com/macros/s/AKfycbxv3e34upUDpF315N7M5hhsn8MR0c6OG91cMyctEiMxmkg3KNQMiWw9zvePNFImOOrMPg/exec
 
+## 모델 사용 정책
+
+- 일반 큐 확인, 상품 조사, 브라우저 조작, 생성 요청, 상태 조회, 파일 처리와 검수는 `gpt-5.6-luna`를 사용한다.
+- 광고 대본의 최초 작성과 문장 수정만 `gpt-5.6-sol`을 사용한다.
+- 대본이 `SCRIPT_READY`로 저장된 뒤에는 Luna가 그대로 읽어 음성·이미지·영상 단계를 이어간다. 이미 확정된 대본을 Luna가 다시 작성하지 않는다.
+- 모델 이름은 영상 대사·자막·CTA·상황판의 소비자용 문구에 노출하지 않는다.
+
 ## 최우선 강제 규칙
 
 제품번호 선확정은 모든 작업의 첫 번째 관문이다. 큐 행의 제품번호 칸에 번호를 기록하고 다시 읽어 확인하기 전에는 상품 페이지 열기, 상품 분석, 대사 작성, 음성 생성, 이미지 생성, 영상 생성, 자막 작성, complete 호출을 절대 수행하지 않는다. 제품번호 칸이 비어 있거나 시트의 마지막 번호를 확인할 수 없으면 즉시 `failed`로 기록하고 중단한다. 이 규칙은 테스트 모드에서도 예외가 없다.
 
+## 실행 강제 규칙
+
+매 heartbeat 시작 시 `?action=dashboard`를 먼저 조회한다. 가장 오래된 `processing` 작업이 있으면 그것을 최우선으로 재개하고, 없을 때만 `?action=pending`에서 새 작업을 claim한다. `processing`을 단순히 건너뛰거나 15분을 기다리는 것은 금지한다.
+
+heartbeat 한 번에 전체 영상이 끝나지 않아도 반드시 현재 체크포인트에서 실제 외부 도구 호출을 한 번 이상 수행한다. 상태 설명만 하고 종료하지 않는다. 생성 요청이 접수되면 Topview의 `taskId`, `taskType`, `boardId`를 즉시 stage에 기록하고, 다음 heartbeat는 새 작업을 만들지 말고 그 taskId를 조회한다. 성공하면 결과 URL을 기록하고 다음 단계로 넘어간다. 실패하면 같은 단계만 한 번 재시도하며, 재시도 불가능할 때만 `failed`를 기록한다.
+
+`pending을 확인했다`, `준비 중이다`, `다음 주기에 처리한다`처럼 실제 호출 없이 단계 문구만 바꾸는 것은 금지한다. 작업을 고아 `processing` 상태로 남기지 않는다.
+
+## 체크포인트 상태 머신
+
+stage는 아래 접두사 중 하나로 시작해야 한다. 사람이 읽는 설명은 `|` 뒤에 붙인다.
+
+- `RESERVED|productNumber=N` — 제품번호 기록·재확인 완료
+- `ANALYZED|...` — 상품 사실·원본 이미지 URL 확보 완료
+- `VOICE_SUBMITTED|taskId=...|taskType=...|boardId=...` — 음성 생성 접수 완료
+- `VOICE_READY|audioUrl=...|duration=...` — 음성 생성·길이 확인 완료
+- `IMAGES_SUBMITTED|taskIds=...|taskType=...|boardId=...` — 장면 이미지 생성 접수 완료
+- `IMAGES_READY|imageUrls=...` — 여섯 장 검수 완료
+- `CLIPS_SUBMITTED|taskIds=...|taskType=...|boardId=...` — 영상 클립 생성 접수 완료
+- `CLIPS_READY|videoUrls=...` — 여섯 클립 검수 완료
+- `EDITING|...` — 음성·클립·자막 합성 중
+- `RENDER_SUBMITTED|taskId=...` — 최종 렌더 접수 완료
+- `READY|videoUrl=...|productNumber=N` — 모바일 재생 검증 완료
+
+재개 규칙은 결정적이어야 한다. `*_SUBMITTED`면 저장된 taskId만 조회하고, `*_READY`면 바로 다음 단계로 이동한다. taskId가 없는 `생성 준비` 같은 과거 stage는 해당 생성 요청을 즉시 제출하고 `*_SUBMITTED`로 교체한다. 같은 단계의 생성 요청을 중복 제출하지 않는다.
+
 ## 작업 순서
 
-1. 자동화가 직접 확인한 `pending` 작업만 claim한다. 이미 `processing`인 작업을 수동으로 claim하지 않는다. `processing` 작업은 단계와 마지막 처리시각을 먼저 확인하고, 15분 이상 정체된 경우에만 GS 자동 복구 후 다시 pending으로 처리한다.
+1. `dashboard`에서 `processing`을 먼저 찾고 stage 상태 머신에 따라 즉시 재개한다. `processing`이 없을 때만 자동화가 직접 확인한 `pending` 작업을 claim한다.
 2. pending 작업을 claim한 직후 Google 시트의 마지막 실제 제품번호 다음 번호를 계산하고, 반드시 큐 행의 제품번호 칸에 기록한다. 기록·재확인 전에는 다음 단계로 진행하지 않는다.
 3. 제품번호가 큐 행에 실제로 보이는지 다시 확인한다. 번호가 비어 있으면 작업을 즉시 실패 처리하고 영상 생성·complete를 금지한다.
 4. 번호가 확정된 뒤 쿠팡 상품 페이지에서 상품명·가격·핵심 기능·구성품·공개 리뷰·간단한 단점과 실제 상품 이미지 2~4장을 확인한다.
@@ -31,6 +64,7 @@
 ## 생성량 제한
 
 - 기준 이미지는 최대 6장, 영상 클립은 최대 6개, 총 영상 생성 길이는 최대 30초다.
+- Topview의 동시 작업 한도에 걸리면 실패 처리하거나 중복 제출하지 않는다. 접수된 taskId를 stage에 저장하고 완료를 조회한 뒤 남은 장면만 다음 배치로 제출한다.
 - 실패한 장면만 한 번 재생성하고 전체를 다시 생성하지 않는다.
 - 사람은 제품 사용 이해에 꼭 필요한 장면에만 넣는다. 인물이 없어도 제품 사용이 명확하면 제품 중심 장면을 우선한다.
 - 캐릭터 시트 원본과 정면·측면·전신 비교 이미지를 본편에 노출하지 않는다.

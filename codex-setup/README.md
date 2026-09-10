@@ -20,3 +20,6 @@
 ## 작업 상태
 
 Google Apps Script의 `_queue`에서 `pending → processing → done/failed`로 확인합니다.
+# 인수인계 핵심 규칙
+
+영상 구성과 제품번호 CTA 규칙은 [`인수인계-자동화-규칙.md`](./인수인계-자동화-규칙.md)를 먼저 읽으세요.

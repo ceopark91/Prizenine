@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "defaultModel": "gpt-5.6-luna",
+  "defaultReasoningEffort": "low",
+  "computerUseModel": "gpt-5.6-luna",
+  "computerUseReasoningEffort": "low",
+  "routes": {
+    "RECEIVED": "gpt-5.6-luna",
+    "DIGGING_DONE": "gpt-5.6-luna",
+    "SHEET_DONE": "gpt-5.6-sol",
+    "SCRIPT_READY": "gpt-5.6-luna",
+    "VIDEO_SUBMITTING": "gpt-5.6-luna",
+    "VIDEO_GENERATING": "gpt-5.6-luna",
+    "VIDEO_VERIFYING": "gpt-5.6-luna"
+  },
+  "reasoningEffortByStage": {
+    "RECEIVED": "low",
+    "DIGGING_DONE": "low",
+    "SHEET_DONE": "high",
+    "SCRIPT_READY": "low",
+    "VIDEO_SUBMITTING": "low",
+    "VIDEO_GENERATING": "low",
+    "VIDEO_VERIFYING": "low"
+  },
+  "policy": "computer-use·수집·큐·시트·영상 상태 확인은 Luna, 콘티와 대본 작성만 Sol"
+}

@@ -58,7 +58,7 @@ if ($null -ne $routeProperty) { $workerModel = [string]$routeProperty.Value }
 $reasoningEffort = [string]$routing.defaultReasoningEffort
 $effortProperty = $routing.reasoningEffortByStage.PSObject.Properties[$selectedStage]
 if ($null -ne $effortProperty) { $reasoningEffort = [string]$effortProperty.Value }
-$prompt += "`nAdvance exactly one verified pipeline stage per run, then stop. Model routing is mandatory: Luna handles queue, research, sheet, and provider-status work; Sol handles only SHEET_DONE to SCRIPT_READY conti/script writing. This run uses $workerModel for stage $selectedStage. Runner claim credentials: owner=$runnerOwner token=$runnerToken. Every claim/checkpoint/register/complete call MUST include these credentials and a unique opId. If a job is already processing with this owner, resume it instead of searching for another job.$activeContext"
+$prompt += "`nAdvance exactly one verified pipeline stage per run, then stop. Model routing is mandatory: Luna Light handles queue, research, sheet, computer-use, and provider-status work; Terra Light handles only SHEET_DONE to SCRIPT_READY conti/script writing. This run uses $workerModel with low reasoning effort for stage $selectedStage. Runner claim credentials: owner=$runnerOwner token=$runnerToken. Every claim/checkpoint/register/complete call MUST include these credentials and a unique opId. If a job is already processing with this owner, resume it instead of searching for another job.$activeContext"
 Push-Location $root
 try {
   $promptFile = Join-Path $logDir "$stamp.prompt.txt"

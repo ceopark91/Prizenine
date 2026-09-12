@@ -7,7 +7,7 @@
   "routes": {
     "RECEIVED": "gpt-5.6-luna",
     "DIGGING_DONE": "gpt-5.6-luna",
-    "SHEET_DONE": "gpt-5.6-sol",
+    "SHEET_DONE": "gpt-5.6-terra",
     "SCRIPT_READY": "gpt-5.6-luna",
     "REVIEW_APPROVED": "gpt-5.6-luna",
     "VIDEO_SUBMITTING": "gpt-5.6-luna",
@@ -17,12 +17,12 @@
   "reasoningEffortByStage": {
     "RECEIVED": "low",
     "DIGGING_DONE": "low",
-    "SHEET_DONE": "high",
+    "SHEET_DONE": "low",
     "SCRIPT_READY": "low",
     "REVIEW_APPROVED": "low",
     "VIDEO_SUBMITTING": "low",
     "VIDEO_GENERATING": "low",
     "VIDEO_VERIFYING": "low"
   },
-  "policy": "computer-use·수집·큐·시트·영상 상태 확인은 Luna, 콘티와 대본 작성만 Sol"
+  "policy": "computer-use·수집·큐·시트·영상 상태 확인은 Luna Light, 콘티와 대본 작성은 Terra Light"
 }

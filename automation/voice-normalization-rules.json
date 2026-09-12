@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "purpose": "TTS 음성은 자연스러운 한국어 발음으로 만들고 화면 자막은 원래 숫자·단위를 유지한다.",
+  "rules": [
+    "spoken_ko에는 숫자와 단위 기호를 그대로 넣지 않는다.",
+    "caption_text에는 상품 원문 표기와 숫자를 유지한다.",
+    "콘티와 TTS 전달 전 spoken_ko를 먼저 생성하고 발음 검사를 통과시킨다.",
+    "제품 크기·무게·전압·소비전력·주파수·수량·상품번호를 모두 한국어 발음으로 변환한다.",
+    "9:16, 해상도, 초 단위 타임코드는 음성에서 읽지 않고 자막·메타데이터에만 둔다."
+  ],
+  "unitPronunciation": {
+    "cm": "센티미터",
+    "mm": "밀리미터",
+    "m": "미터",
+    "kg": "킬로그램",
+    "g": "그램",
+    "L": "리터",
+    "mL": "밀리리터",
+    "W": "와트",
+    "V": "볼트",
+    "Hz": "헤르츠",
+    "inch": "인치"
+  },
+  "examples": [
+    {"source": "120cm", "spoken_ko": "백이십 센티미터", "caption_text": "120cm"},
+    {"source": "12W", "spoken_ko": "십이 와트", "caption_text": "12W"},
+    {"source": "220V", "spoken_ko": "이백이십 볼트", "caption_text": "220V"},
+    {"source": "3개", "spoken_ko": "세 개", "caption_text": "3개"},
+    {"source": "상품번호 23번", "spoken_ko": "상품번호 이십삼 번", "caption_text": "상품번호 23번"}
+  ],
+  "requiredSceneFields": ["spoken_ko", "caption_text"]
+}

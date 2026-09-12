@@ -64,7 +64,9 @@ try {
   $promptFile = Join-Path $logDir "$stamp.prompt.txt"
   Set-Content -LiteralPath $promptFile -Value $prompt -Encoding UTF8
   $codexPath = (Get-Command codex -ErrorAction Stop).Source
-  $cmd = '"' + $codexPath + '" exec --ignore-user-config --cd "' + $root + '" --skip-git-repo-check --model ' + $workerModel + ' --config model_reasoning_effort=' + $reasoningEffort + ' --sandbox danger-full-access --json - < "' + $promptFile + '" > "' + $log + '" 2>&1'
+  # Load the user's enabled Topview MCP plugin so REVIEW_APPROVED can hand off to real media tools.
+  # The preflight gates above prevent this command from running while there is no approved work.
+  $cmd = '"' + $codexPath + '" exec --cd "' + $root + '" --skip-git-repo-check --model ' + $workerModel + ' --config model_reasoning_effort=' + $reasoningEffort + ' --sandbox danger-full-access --json - < "' + $promptFile + '" > "' + $log + '" 2>&1'
   cmd.exe /d /c $cmd
   $workerExit = $LASTEXITCODE
 } finally {

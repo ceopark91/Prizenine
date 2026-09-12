@@ -17,7 +17,7 @@
 </main>
 <div class="review" id="review"><div class="review-card"><div class="toolbar"><h2>상품 검수·수정</h2><button class="refresh" onclick="closeReview()">닫기</button></div><p class="status" id="reviewMeta"></p><div class="review-grid"><div><b>상품 이미지 URL</b><textarea id="reviewImages" placeholder="줄마다 이미지 URL 1개"></textarea></div><div><b>AI 콘티</b><textarea id="reviewConti" placeholder="AI 콘티를 확인하고 수정하세요"></textarea></div></div><div class="review-actions"><button class="secondary" onclick="saveReview(false)">수정 저장</button><button onclick="saveReview(true)">검수 완료 · 제작 요청</button></div><div class="status" id="reviewStatus"></div></div></div>
 <script>
-const GS='https://script.google.com/macros/s/AKfycbxv3e34upUDpF315N7M5hhsn8MR0c6OG91cMyctEiMxmkg3KNQMiWw9zvePNFImOOrMPg/exec';
+const GS='/api/dashboard';
 const $=s=>document.querySelector(s); const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function fmt(v){if(!v)return '-';const d=new Date(v);return isNaN(d)?esc(v):d.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}
 function badge(s){const key=String(s||'').toLowerCase();const cls=key==='done'?'done':key==='failed'?'failed':key==='processing'?'processing':'pending';const label=key==='done'?'완료':key==='failed'?'실패':key==='processing'?'진행 중':'대기';return `<span class="badge ${cls}">${label}</span>`;}

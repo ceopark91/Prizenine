@@ -1,4 +1,6 @@
 const PRODUCT_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1b_dNkuhjl2XQbc3JG4dTrjbIyszzkjLs6cP35xaHQFY/export?format=csv&gid=0';
+const SUPABASE_URL = 'https://ybvnekkbbnhbcnnatkui.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0-6qJZXSmiKQKsoF5FQw-w_xH-PNfWD';
 const DEFAULT_PRODUCT_IMAGE = 'default-product.svg';
 const fallbackProducts = [
   { number: '01', category: '생활', title: '아침을 바꾸는 작은 조명', product: '무드등 · 오늘의집', image: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=360&q=85', link: 'https://www.coupang.com/' },
@@ -58,14 +60,18 @@ function parseCsv(csv) {
 
 async function loadProducts() {
   products = fallbackProducts;
-  if (!PRODUCT_SHEET_CSV_URL) { renderProducts(); return; }
   try {
-    const response = await fetch(PRODUCT_SHEET_CSV_URL, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`Sheet returned ${response.status}`);
-    const sheetProducts = parseCsv(await response.text());
-    if (sheetProducts.length) products = sheetProducts;
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/jobs?select=*&order=created_at.asc&limit=200`, { cache: 'no-store', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+    if (!response.ok) throw new Error(`Supabase returned ${response.status}`);
+    const jobs = await response.json();
+    const supabaseProducts = jobs.map((job) => {
+      const product = job.product || {};
+      const images = job.review?.images || job.research?.images || [];
+      return { number: job.product_number || product.number || job.id.slice(0, 6), category: product.category || '기타', title: product.title || job.url, product: product.description || job.stage || '', image: images[0] || DEFAULT_PRODUCT_IMAGE, link: job.url };
+    }).filter((item) => item.title && item.link);
+    if (supabaseProducts.length) products = supabaseProducts;
   } catch (error) {
-    console.warn('Google Sheet could not be loaded. Showing fallback products.', error);
+    try { const response = await fetch(PRODUCT_SHEET_CSV_URL, { cache: 'no-store' }); const sheetProducts = parseCsv(await response.text()); if (sheetProducts.length) products = sheetProducts; } catch (_) { console.warn('Supabase and Google Sheet could not be loaded.', error); }
   }
   renderProducts();
 }

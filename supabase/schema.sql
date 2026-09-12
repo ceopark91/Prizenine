@@ -30,3 +30,21 @@ alter publication supabase_realtime add table public.jobs;
 
 create index if not exists jobs_updated_at_idx on public.jobs(updated_at desc);
 create index if not exists jobs_status_stage_idx on public.jobs(status, stage);
+
+create table if not exists public.products (
+  id uuid primary key,
+  number text,
+  category text,
+  title text not null,
+  description text,
+  image text,
+  link text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.products enable row level security;
+create policy "products_read" on public.products for select to anon, authenticated using (true);
+create policy "products_insert" on public.products for insert to anon, authenticated with check (true);
+create policy "products_update" on public.products for update to anon, authenticated using (true) with check (true);
+create policy "products_delete" on public.products for delete to anon, authenticated using (true);
+create index if not exists products_number_idx on public.products(number);

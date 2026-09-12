@@ -20,7 +20,9 @@ Stage policy:
 - RECEIVED: collect product identity, specs, reviews, and multiple attributable images; save evidence; advance to DIGGING_DONE only when verified.
 - DIGGING_DONE: sync verified research to the spreadsheet/checkpoint; advance to SHEET_DONE.
 - SHEET_DONE: write the full Korean conti/script using the voice, unit-pronunciation, and realistic product-scale rules; advance to SCRIPT_READY.
-- SCRIPT_READY and later: submit or poll the existing Topview task, persist taskId, and verify playable video URL and duration before completion.
+- SCRIPT_READY without review.approvedAt: never submit; stop and wait for the dashboard production request.
+- REVIEW_APPROVED: submit to Topview exactly once and persist taskId.
+- VIDEO_SUBMITTING and later: poll the existing Topview task and verify playable video URL and duration before completion.
 
 If Coupang returns 403, use an already available authenticated browser/research helper. Do not waste tokens retrying public search more than once. If no authenticated browser helper exists, checkpoint that exact blocker and stop. Never publish, purchase, delete, or silently advance a stage.
 '@
@@ -30,15 +32,24 @@ $runnerOwner = 'prizenine-runner'
 $queueUrl = 'https://script.google.com/macros/s/AKfycbxv3e34upUDpF315N7M5hhsn8MR0c6OG91cMyctEiMxmkg3KNQMiWw9zvePNFImOOrMPg/exec'
 $activeContext = ''
 $selectedStage = 'RECEIVED'
+$hasWork = $false
+$reviewApproved = $false
 try {
   $work = Invoke-RestMethod -Uri ($queueUrl + '?action=work') -TimeoutSec 30
   $active = @($work.jobs | Where-Object { $_.status -eq 'processing' -and $_.leaseOwner -eq $runnerOwner } | Select-Object -First 1)
   if ($active.Count -eq 0) { $active = @($work.jobs | Where-Object { $_.status -eq 'pending' } | Select-Object -First 1) }
   if ($active.Count -gt 0) {
+    $hasWork = $true
     $selectedStage = [string]$active[0].stage
+    $reviewApproved = -not [string]::IsNullOrWhiteSpace([string]$active[0].review.approvedAt)
     $activeContext = " Work on this exact job only: jobId=$($active[0].jobId), stage=$selectedStage, url=$($active[0].url)."
   }
 } catch { $activeContext = " Queue preflight failed; record the failure and do not invent progress." }
+if (-not $hasWork) { Write-Output 'NO_WORK'; exit 0 }
+if ($selectedStage -eq 'SCRIPT_READY' -and -not $reviewApproved) {
+  Write-Output ("WAITING_FOR_REVIEW jobId=" + $active[0].jobId)
+  exit 0
+}
 $routingPath = Join-Path $PSScriptRoot 'model-routing.json'
 $routing = Get-Content -LiteralPath $routingPath -Raw | ConvertFrom-Json
 $workerModel = [string]$routing.defaultModel

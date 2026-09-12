@@ -48,3 +48,24 @@ create policy "products_insert" on public.products for insert to anon, authentic
 create policy "products_update" on public.products for update to anon, authenticated using (true) with check (true);
 create policy "products_delete" on public.products for delete to anon, authenticated using (true);
 create index if not exists products_number_idx on public.products(number);
+
+create table if not exists public.recommendation_requests (
+  id uuid primary key,
+  category text not null,
+  budget text,
+  note text,
+  requested_date date not null default current_date,
+  status text not null default 'pending',
+  result jsonb not null default '{}'::jsonb,
+  error text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.recommendation_requests enable row level security;
+drop policy if exists "recommendations_read" on public.recommendation_requests;
+create policy "recommendations_read" on public.recommendation_requests for select to anon, authenticated using (true);
+drop policy if exists "recommendations_insert" on public.recommendation_requests;
+create policy "recommendations_insert" on public.recommendation_requests for insert to anon, authenticated with check (true);
+drop policy if exists "recommendations_update" on public.recommendation_requests;
+create policy "recommendations_update" on public.recommendation_requests for update to anon, authenticated using (true) with check (true);
+create index if not exists recommendation_requests_status_idx on public.recommendation_requests(status, created_at desc);

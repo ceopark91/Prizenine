@@ -63,7 +63,7 @@ async function loadProducts() {
   try {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=created_at.asc&limit=200`, { cache: 'no-store', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
     if (!response.ok) throw new Error(`Supabase returned ${response.status}`);
-    const supabaseProducts = (await response.json()).map((item) => ({ number: item.number || item.id.slice(0, 6), category: item.category || '기타', title: item.title, product: item.description || '', image: item.image || DEFAULT_PRODUCT_IMAGE, link: item.link })).filter((item) => item.title && item.link);
+    const supabaseProducts = (await response.json()).map((item) => ({ number: item.number || item.id.slice(0, 6), category: item.category || '기타', title: item.title, product: item.description || '', image: item.image || DEFAULT_PRODUCT_IMAGE, link: item.link })).filter((item) => item.title && item.link && !/^https?:\/\//i.test(item.title) && item.title !== item.link);
     if (supabaseProducts.length) products = supabaseProducts;
   } catch (error) {
     try { const response = await fetch(PRODUCT_SHEET_CSV_URL, { cache: 'no-store' }); const sheetProducts = parseCsv(await response.text()); if (sheetProducts.length) products = sheetProducts; } catch (_) { console.warn('Supabase and Google Sheet could not be loaded.', error); }

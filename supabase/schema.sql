@@ -68,4 +68,6 @@ drop policy if exists "recommendations_insert" on public.recommendation_requests
 create policy "recommendations_insert" on public.recommendation_requests for insert to anon, authenticated with check (true);
 drop policy if exists "recommendations_update" on public.recommendation_requests;
 create policy "recommendations_update" on public.recommendation_requests for update to anon, authenticated using (true) with check (true);
+drop policy if exists "recommendations_delete" on public.recommendation_requests;
+create policy "recommendations_delete" on public.recommendation_requests for delete to anon, authenticated using (true);
 create index if not exists recommendation_requests_status_idx on public.recommendation_requests(status, created_at desc);

@@ -21,7 +21,9 @@ Stage policy:
 - DIGGING_DONE: sync verified research to the spreadsheet/checkpoint; advance to SHEET_DONE.
 - SHEET_DONE: write the full Korean conti/script using the voice, unit-pronunciation, and realistic product-scale rules; advance to SCRIPT_READY.
 - SCRIPT_READY without review.approvedAt: never submit; stop and wait for the dashboard production request.
-- REVIEW_APPROVED: submit to Topview exactly once and persist taskId.
+- REVIEW_APPROVED: a detached worker must never submit or fail Topview work.
+  Return `CHAT_TOPVIEW_MCP_REQUIRED` so the authenticated Codex chat can
+  create durable Canvas media, submit once, and persist taskId.
 - VIDEO_SUBMITTING and later: poll the existing Topview task and verify playable video URL and duration before completion.
 
 If Coupang returns 403, use an already available authenticated browser/research helper. Do not waste tokens retrying public search more than once. If no authenticated browser helper exists, checkpoint that exact blocker and stop. Never publish, purchase, delete, or silently advance a stage.
@@ -46,6 +48,12 @@ try {
   }
 } catch { $activeContext = " Queue preflight failed; record the failure and do not invent progress." }
 if (-not $hasWork) { Write-Output 'NO_WORK'; exit 0 }
+if ($selectedStage -eq 'REVIEW_APPROVED') {
+  # Authentication for Topview is intentionally chat-bound.  Treating its
+  # absence in `codex exec` as VIDEO_SUBMIT_FAILED caused false terminal jobs.
+  Write-Output ("CHAT_TOPVIEW_MCP_REQUIRED jobId=" + $active[0].jobId)
+  exit 0
+}
 if ($selectedStage -eq 'SCRIPT_READY' -and -not $reviewApproved) {
   Write-Output ("WAITING_FOR_REVIEW jobId=" + $active[0].jobId)
   exit 0

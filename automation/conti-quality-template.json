@@ -1,0 +1,12 @@
+{
+  "requiredTopLevel": ["cta","tone","voice","format","concept","scenes","limitations","pronunciationRules"],
+  "minimumScenes": 6,
+  "durationSec": {"min":28,"max":40},
+  "sceneRequiredFields": ["time","sceneRole","assetType","camera","visual","narration","captionText","captionStyle","captionPosition","captionSafeArea","transition"],
+  "sceneFlow": ["problem_hook","product_first_impression","multi_angle_closeup","real_use","honest_limit_or_check","cta"],
+  "captionRules": {"maxLines":2,"keepNumericSymbols":true,"mustSpecifyStyle":true,"mustSpecifySafeArea":true},
+  "evidenceRules": {"onlyVerifiedClaims":true,"reviewSummaryNeedsBodyEvidence":true,"unverifiedReviewMustStateLimitation":true,"productScaleMustMatchSpecs":true},
+  "voiceRules": {"spokenNumbersAndUnits":"Korean pronunciation","captionNumbersAndUnits":"readable numeric symbols"},
+  "modelRules": {"character":"명예모델1호","allowedAssetTypes":["model_intro","model_cta"],"notRequiredEveryScene":true},
+  "buyerIntent": "문제/욕구 자극 → 제품 형태와 다각도 확인 → 실제 사용 장면 → 확인된 장점 → 솔직한 제한·주의 → 상품번호 CTA"
+}

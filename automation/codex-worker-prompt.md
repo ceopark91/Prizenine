@@ -8,7 +8,7 @@
 - 모든 비종료 job은 `requiredActionForJob()`이 반환하는 한 가지 다음 행동을 가져야 한다. “상태 변화 없음”은 실행 가능한 job의 결과가 될 수 없다.
 - `VIDEO_SUBMIT_FAILED`는 Topview가 실제 submit 후 taskId/submissionId와 함께 반환한 최종 오류일 때만 쓴다. 현재 채팅에만 있는 MCP 인증, Canvas 미디어 준비 부족, 워커의 기능 부재는 실패 원인이 아니다.
 - `REVIEW_APPROVED` 순서: 콘티 품질 통과 → 채팅의 인증된 Topview MCP로 Canvas·영속 미디어 준비 → 라이브 capability 기반 계획 고정 → 실제 taskId/nodeId/submissionId 저장 → 결과 폴링·완료 또는 실제 제공자 실패 기록.
-- detached `codex exec` 워커는 chat-bound Topview MCP를 호출하지 못할 수 있다. 이 경우 `CHAT_TOPVIEW_MCP_REQUIRED`를 반환하고 상태를 보존한다. 예약된 이 채팅의 heartbeat가 직접 MCP 단계를 수행한다.
+- detached `codex exec` 워커는 chat-bound Topview MCP와 Computer Use를 호출하지 못할 수 있다. 이 경우 `CHAT_TOPVIEW_MCP_REQUIRED` 또는 `CHAT_BROWSER_RESEARCH_REQUIRED`를 반환하고 상태를 보존한다. 예약된 이 채팅의 heartbeat가 직접 해당 단계를 수행한다.
 - 모든 Supabase 변경은 revision 조건부 저장 후 재조회한다. 충돌 시 같은 작업만 다시 판정하며 다른 job을 임의로 고르지 않는다.
 
 ## 제품 확인 및 번호 불변식
@@ -21,7 +21,7 @@
 ## 추천 제품 요청
 
 - `recommendation_requests.pending`은 독립 실행 큐다. 성공하면 중복 검사를 통과한 실제 쿠팡 상품을 `jobs.RECEIVED`로 이관하고 요청을 완료로 한다.
-- 후보 선정은 공개 웹/시장성/계절성/경쟁도/영상 적합성을 먼저 분석한다. 최근 products와 jobs의 상품번호·제목·세부 카테고리를 비교해 중복과 최근 추천군 반복을 막고, 최종 후보 하나만 쿠팡 렌더 페이지로 검증한다.
+- 후보 선정은 현재 채팅의 정상 브라우저에서 공개 웹/시장성/계절성/경쟁도/영상 적합성을 먼저 분석한다. 최근 products와 jobs의 상품번호·제목·세부 카테고리를 비교해 중복과 최근 추천군 반복을 막고, 최종 후보 하나만 쿠팡 렌더 페이지로 검증한다. detached worker는 BrowserAct core, stealth 추출, 프록시 모드를 호출하지 않는다.
 
 ## 콘티 품질 게이트
 
